@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1783179570691,
+    "service": "Classic Lash Lift",
+    "date": "2026-07-11",
+    "time": "10:00",
+    "technician": "Naurelle",
+    "addOns": [
+      "Lash tint"
+    ],
+    "name": "test book",
+    "phone": "0265373969",
+    "email": "dannytheog00@gmail.com",
+    "instagram": "",
+    "notes": "",
+    "status": "Pending Deposit",
+    "depositAmount": 50,
+    "createdAt": "2026-07-04T15:39:30.691Z"
+  }
+]

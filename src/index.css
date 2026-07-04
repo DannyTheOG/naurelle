@@ -24,7 +24,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fff8f4 0%, #fdf2f5 100%);
+  background:
+    radial-gradient(circle at top left, rgba(255, 239, 245, 0.9), transparent 28%),
+    linear-gradient(135deg, #fff9f4 0%, #fdf2f5 100%);
 }
 
 #root {
