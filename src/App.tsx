@@ -432,27 +432,101 @@ function PoliciesPage() {
       <section className="section split">
         <div className="policy-intro">
           <p className="eyebrow">Policies</p>
-          <h2>Everything you need before your appointment.</h2>
+          <h2>Booking terms and salon etiquette.</h2>
           <p className="hero-text">
-            We keep your booking experience simple, transparent, and beautifully organised.
+            Please review these policies before booking so your appointment runs smoothly.
           </p>
         </div>
         <div className="policy-stack">
           <div className="mini-card">
             <h3>Booking essentials</h3>
             <ul className="policy-list">
-              <li>Deposit is required to secure your booking.</li>
-              <li>Late arrivals may require a shortened service.</li>
-              <li>Cancellation with 24 hours notice is eligible for deposit transfer.</li>
+              <li>Deposit is non-refundable.</li>
+              <li>Appointments can only be rescheduled at least 24 hours before.</li>
+              <li>Late arrivals over 15 minutes may be cancelled.</li>
+              <li>No-shows forfeit the deposit.</li>
             </ul>
           </div>
           <div className="mini-card">
             <h3>Studio notes</h3>
             <ul className="policy-list">
-              <li>All services are provided in a clean, professional environment.</li>
-              <li>Bring inspiration photos for a more tailored finish.</li>
-              <li>We’ll guide your prep and aftercare with care.</li>
+              <li>No extra guests.</li>
+              <li>Please arrive with clean lashes/nails.</li>
+              <li>We recommend arriving a few minutes early for a calm, relaxed start.</li>
             </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function ContactPage() {
+  return (
+    <div className="page">
+      <div className="page-topbar">
+        <Link className="back-link" to="/">
+          ← Back home
+        </Link>
+      </div>
+      <section className="section split">
+        <div className="policy-intro">
+          <p className="eyebrow">Contact</p>
+          <h2>Visit the studio or reach out directly.</h2>
+          <p className="hero-text">
+            We’d love to hear from you for bookings, consultation questions, or styling advice.
+          </p>
+
+          <div className="contact-card">
+            <h3>Studio details</h3>
+            <p><strong>Address:</strong> 12A Abelenkpe Road, East Legon, Accra</p>
+            <p><strong>Phone:</strong> +233 55 123 4567</p>
+            <p><strong>Email:</strong> hello@naurellebeauty.com</p>
+            <div className="social-links">
+              <a href="https://wa.me/233551234567" target="_blank" rel="noreferrer" className="button primary">WhatsApp</a>
+              <a href="https://www.instagram.com/naurellebeauty" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/@naurellebeauty" target="_blank" rel="noreferrer">TikTok</a>
+            </div>
+          </div>
+
+          <div className="contact-card">
+            <h3>Business hours</h3>
+            <p>Monday – Friday: 10:00 AM – 7:00 PM</p>
+            <p>Saturday: 10:00 AM – 5:00 PM</p>
+            <p>Sunday: Closed</p>
+          </div>
+        </div>
+
+        <div className="contact-stack">
+          <div className="mini-card map-card">
+            <h3>Find us</h3>
+            <iframe
+              title="Naurélle Beauty location"
+              src="https://www.google.com/maps?q=East%20Legon%20Accra&z=13&output=embed"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+
+          <div className="mini-card">
+            <h3>Send a message</h3>
+            <form className="contact-form">
+              <label>
+                Name
+                <input type="text" placeholder="Your name" />
+              </label>
+              <label>
+                Email
+                <input type="email" placeholder="you@example.com" />
+              </label>
+              <label>
+                Message
+                <textarea placeholder="Tell us about your appointment or question" />
+              </label>
+              <button className="button primary" type="button">
+                Send message
+              </button>
+            </form>
           </div>
         </div>
       </section>
@@ -481,9 +555,9 @@ function App() {
         </button>
 
         <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
-          <Link to="/bookings" onClick={closeMenu} className={location.pathname === '/bookings' ? 'active' : ''}>
+          {/* <Link to="/bookings" onClick={closeMenu} className={location.pathname === '/bookings' ? 'active' : ''}>
             Bookings
-          </Link>
+          </Link> */}
           <Link to="/services" onClick={closeMenu} className={location.pathname === '/services' ? 'active' : ''}>
             Services
           </Link>
@@ -492,6 +566,9 @@ function App() {
           </Link>
           <Link to="/policies" onClick={closeMenu} className={location.pathname === '/policies' ? 'active' : ''}>
             Policies
+          </Link>
+          <Link to="/contact" onClick={closeMenu} className={location.pathname === '/contact' ? 'active' : ''}>
+            Contact
           </Link>
           <Link className="button nav-cta" to="/bookings" onClick={closeMenu}>
             Book now
@@ -505,6 +582,7 @@ function App() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/policies" element={<PoliciesPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </div>
   )
