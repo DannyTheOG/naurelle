@@ -1,42 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
+  /* User-Defined Primary Brand Palette */
+  --color-baby-pink: #F7DDE4;
+  --color-baby-pink-light: #FDF2F5;
+  --color-nude: #F5EFEA;
+  --color-nude-dark: #EBE0D7;
+  --color-gold: #D4AF37;
+  --color-gold-hover: #C59F2A;
+  --color-gold-light: #FAF4E1;
+  --color-white: #FFFFFF;
+  
+  /* Typography & High Contrast Accents */
+  --color-charcoal: #1C1619;
+  --color-charcoal-muted: #5C5258;
+  --color-pink-accent: #C87A8A;
+  --color-pink-accent-dark: #A45868;
+  
+  /* Borders & Glassmorphic Highlights */
+  --color-border-subtle: rgba(247, 221, 228, 0.6);
+  --color-border-gold: rgba(212, 175, 55, 0.35);
+  --color-glass-bg: rgba(255, 255, 255, 0.82);
+  --color-glass-border: rgba(255, 255, 255, 0.6);
+  
+  /* Typography Tokens */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Elevation & Shadows */
+  --shadow-sm: 0 4px 12px rgba(28, 22, 25, 0.03);
+  --shadow-md: 0 10px 30px rgba(164, 88, 104, 0.08);
+  --shadow-lg: 0 20px 45px rgba(28, 22, 25, 0.09);
+  --shadow-gold: 0 10px 25px rgba(212, 175, 55, 0.28);
+  
+  /* Border Radius */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
   font-weight: 400;
-  color: #2f2333;
-  background-color: #fdf8f3;
-  font-synthesis: none;
+  color: var(--color-charcoal);
+  background-color: var(--color-nude);
+  background-image: 
+    radial-gradient(circle at 10% 0%, var(--color-baby-pink) 0%, transparent 40%),
+    radial-gradient(circle at 90% 40%, rgba(250, 244, 225, 0.8) 0%, transparent 35%),
+    linear-gradient(180deg, var(--color-white) 0%, var(--color-nude) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(255, 239, 245, 0.9), transparent 28%),
-    linear-gradient(135deg, #fff9f4 0%, #fdf2f5 100%);
-}
-
-#root {
-  width: 100%;
-}
-
-h1,
-h2,
-h3 {
-  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--color-charcoal);
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -44,9 +88,34 @@ a {
   text-decoration: none;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+input, select, textarea, button {
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-nude);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-baby-pink);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-pink-accent);
+}
+
+/* Selection Highlight */
+::selection {
+  background-color: var(--color-baby-pink);
+  color: var(--color-charcoal);
 }
