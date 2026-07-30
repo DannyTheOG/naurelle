@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { Calendar, Clock, User, Sparkles, CheckCircle2, ShieldAlert, ArrowLeft, Send } from 'lucide-react'
-import type { BookingForm } from '../types'
-import { Toast } from '../components/ui/Toast'
+import { Calendar, Clock, Sparkles, CheckCircle2, ShieldAlert, Send } from 'lucide-react'
+import type { BookingForm } from '../../types'
+import { Toast } from '../ui/Toast'
 
 const initialForm: BookingForm = {
-  service: 'Classic Lash Lift',
+  service: 'Gel Manicure',
   date: '',
   time: '10:00',
   technician: 'Any available',
@@ -17,42 +16,38 @@ const initialForm: BookingForm = {
   notes: ''
 }
 
-export function BookingPage() {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  
-  const [formData, setFormData] = useState<BookingForm>(() => {
-    const serviceParam = searchParams.get('service')
-    return serviceParam ? { ...initialForm, service: serviceParam } : initialForm
-  })
+type BookingSectionProps = {
+  preselectedService?: string
+}
 
+export function BookingSection({ preselectedService }: BookingSectionProps) {
+  const [formData, setFormData] = useState<BookingForm>(initialForm)
   const [loading, setLoading] = useState(false)
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [confirmation, setConfirmation] = useState('')
   const [availabilityMessage, setAvailabilityMessage] = useState('')
 
   useEffect(() => {
-    const serviceParam = searchParams.get('service')
-    if (serviceParam) {
-      setFormData(prev => ({ ...prev, service: serviceParam }))
+    if (preselectedService) {
+      setFormData(prev => ({ ...prev, service: preselectedService }))
     }
-  }, [searchParams])
+  }, [preselectedService])
 
   const calculateDeposit = () => {
-    return formData.service === 'Classic Lash Lift' ? 50 : 75
+    return formData.service === 'Gel Manicure' ? 50 : 75
   }
 
   const calculateBasePrice = () => {
-    if (formData.service === 'Classic Lash Lift') return 95
     if (formData.service === 'Gel Manicure') return 75
-    if (formData.service === 'Hybrid Fill') return 85
-    return 95
+    if (formData.service === 'BIAB Builder Gel Overlay') return 95
+    if (formData.service === 'Sculpted Acrylic Set') return 120
+    return 75
   }
 
   const calculateAddonsTotal = () => {
     let sum = 0
-    if (formData.addOns.includes('Lash tint')) sum += 20
-    if (formData.addOns.includes('Nail art')) sum += 15
+    if (formData.addOns.includes('Chrome & Gold Shimmer Art')) sum += 20
+    if (formData.addOns.includes('Paraffin Moisture Care')) sum += 15
     return sum
   }
 
@@ -114,8 +109,7 @@ export function BookingPage() {
 
       setTimeout(() => {
         setFormData(initialForm)
-        navigate('/policies')
-      }, 2500)
+      }, 3000)
     } catch {
       setToastMessage({
         text: 'Your booking could not be sent right now. Please email hello@naurellebeauty.com directly.',
@@ -128,20 +122,13 @@ export function BookingPage() {
   }
 
   return (
-    <div className="page-wrapper">
-      <div style={{ marginBottom: '24px' }}>
-        <Link to="/" className="btn btn-outline btn-sm" style={{ display: 'inline-flex', gap: '6px' }}>
-          <ArrowLeft size={16} />
-          <span>Back to Home</span>
-        </Link>
-      </div>
-
-      <div style={{ marginBottom: '32px' }}>
-        <div className="eyebrow">
-          <span>Appointment Reservations</span>
+    <section className="section" id="booking" style={{ padding: '48px 0', scrollMarginTop: '80px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+        <div className="eyebrow" style={{ justifyContent: 'center' }}>
+          <span>Nail Appointment Reservations</span>
         </div>
-        <h1 className="section-title">Reserve your appointment & secure your deposit.</h1>
-        <p className="section-subtitle">
+        <h2 className="section-title">Reserve your nail treatment & secure your deposit.</h2>
+        <p className="section-subtitle" style={{ margin: '0 auto' }}>
           Fill in your preferences below. Our studio team will confirm availability and send your deposit invoice link.
         </p>
       </div>
@@ -153,12 +140,12 @@ export function BookingPage() {
             <div className="form-group">
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={16} style={{ color: 'var(--color-gold)' }} />
-                <span>Select Service Ritual</span>
+                <span>Select Nail Service Ritual</span>
               </label>
               <select className="form-select" name="service" value={formData.service} onChange={handleChange}>
-                <option value="Classic Lash Lift">Classic Lash Lift ($95)</option>
                 <option value="Gel Manicure">Gel Manicure ($75)</option>
-                <option value="Hybrid Fill">Hybrid Fill ($85)</option>
+                <option value="BIAB Builder Gel Overlay">BIAB Builder Gel Overlay ($95)</option>
+                <option value="Sculpted Acrylic Set">Sculpted Acrylic Set ($120)</option>
               </select>
             </div>
 
@@ -194,42 +181,30 @@ export function BookingPage() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <User size={15} style={{ color: 'var(--color-gold)' }} />
-                <span>Preferred Specialist</span>
-              </label>
-              <select className="form-select" name="technician" value={formData.technician} onChange={handleChange}>
-                <option value="Any available">Any available specialist</option>
-                <option value="Naurelle">Naurélle (Senior Specialist)</option>
-                <option value="Assistant">Studio Assistant</option>
-              </select>
-            </div>
-
             {/* Add-ons Selection */}
             <div className="form-group">
               <label className="form-label">Optional Add-ons</label>
               <div className="addon-checkbox-grid">
-                <label className={`addon-card ${formData.addOns.includes('Lash tint') ? 'selected' : ''}`}>
+                <label className={`addon-card ${formData.addOns.includes('Chrome & Gold Shimmer Art') ? 'selected' : ''}`}>
                   <input
                     type="checkbox"
-                    checked={formData.addOns.includes('Lash tint')}
-                    onChange={() => handleAddOnToggle('Lash tint')}
+                    checked={formData.addOns.includes('Chrome & Gold Shimmer Art')}
+                    onChange={() => handleAddOnToggle('Chrome & Gold Shimmer Art')}
                   />
                   <div>
-                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Lash Tint</strong>
+                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Chrome & Gold Art</strong>
                     <span style={{ fontSize: '0.78rem', color: 'var(--color-pink-accent-dark)' }}>+GHS 20</span>
                   </div>
                 </label>
 
-                <label className={`addon-card ${formData.addOns.includes('Nail art') ? 'selected' : ''}`}>
+                <label className={`addon-card ${formData.addOns.includes('Paraffin Moisture Care') ? 'selected' : ''}`}>
                   <input
                     type="checkbox"
-                    checked={formData.addOns.includes('Nail art')}
-                    onChange={() => handleAddOnToggle('Nail art')}
+                    checked={formData.addOns.includes('Paraffin Moisture Care')}
+                    onChange={() => handleAddOnToggle('Paraffin Moisture Care')}
                   />
                   <div>
-                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Nail Art Shimmer</strong>
+                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Paraffin Hand Care</strong>
                     <span style={{ fontSize: '0.78rem', color: 'var(--color-pink-accent-dark)' }}>+GHS 15</span>
                   </div>
                 </label>
@@ -296,7 +271,7 @@ export function BookingPage() {
                   name="notes"
                   value={formData.notes}
                   onChange={handleChange}
-                  placeholder="Share any sensitivities, style inspirations, or questions..."
+                  placeholder="Share any nail shape preferences, sensitivities, or art inspirations..."
                 />
               </div>
             </div>
@@ -328,7 +303,7 @@ export function BookingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.92rem', marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--color-charcoal-muted)' }}>Base Price:</span>
-                <strong>${calculateBasePrice()} USD</strong>
+                <strong>₵{calculateBasePrice()}</strong>
               </div>
               {formData.addOns.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -341,7 +316,7 @@ export function BookingPage() {
                 <strong>{formData.date || 'Select date'} @ {formData.time}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Specialist:</span>
+                <span>Nail Technician:</span>
                 <strong>{formData.technician}</strong>
               </div>
             </div>
@@ -386,6 +361,6 @@ export function BookingPage() {
       {toastMessage && (
         <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />
       )}
-    </div>
+    </section>
   )
 }

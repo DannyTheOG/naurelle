@@ -1,62 +1,90 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Sparkles, Calendar } from 'lucide-react'
+
+const SECTIONS = ['services', 'pricing', 'gallery', 'booking', 'policies', 'contact']
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const location = useLocation()
+  const [activeSection, setActiveSection] = useState<string>('hero')
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
+
+      // Scroll Spy logic
+      const scrollPos = window.scrollY + 120
+      for (const sectionId of SECTIONS) {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          const top = el.offsetTop
+          const height = el.offsetHeight
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(sectionId)
+            break
+          }
+        }
+      }
     }
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Close menu on route change
-  useEffect(() => {
+  const scrollToSection = (e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault()
     setMobileMenuOpen(false)
-  }, [location])
+    const el = document.getElementById(sectionId)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <header className="navbar-sticky">
       <div className={`navbar-inner ${scrolled ? 'scrolled' : ''}`}>
-        <Link to="/" className="brand-logo" aria-label="Naurélle Beauty Home">
+        <a href="#hero" onClick={(e) => scrollToSection(e, 'hero')} className="brand-logo" aria-label="Naurélle Beauty Home">
           <img src="/hero.png" alt="Naurélle Logo" className="brand-logo-img" />
           <span>Naurélle</span>
-        </Link>
+        </a>
 
         <nav className="nav-menu">
-          <Link
-            to="/services"
-            className={`nav-link ${location.pathname === '/services' ? 'active' : ''}`}
+          <a
+            href="#services"
+            onClick={(e) => scrollToSection(e, 'services')}
+            className={`nav-link ${activeSection === 'services' ? 'active' : ''}`}
           >
             Services
-          </Link>
-          <Link
-            to="/gallery"
-            className={`nav-link ${location.pathname === '/gallery' ? 'active' : ''}`}
+          </a>
+          <a
+            href="#gallery"
+            onClick={(e) => scrollToSection(e, 'gallery')}
+            className={`nav-link ${activeSection === 'gallery' ? 'active' : ''}`}
           >
             Gallery
-          </Link>
-          <Link
-            to="/policies"
-            className={`nav-link ${location.pathname === '/policies' ? 'active' : ''}`}
+          </a>
+          <a
+            href="#policies"
+            onClick={(e) => scrollToSection(e, 'policies')}
+            className={`nav-link ${activeSection === 'policies' ? 'active' : ''}`}
           >
             Policies
-          </Link>
-          <Link
-            to="/contact"
-            className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}
+          </a>
+          <a
+            href="#contact"
+            onClick={(e) => scrollToSection(e, 'contact')}
+            className={`nav-link ${activeSection === 'contact' ? 'active' : ''}`}
           >
             Contact
-          </Link>
-          <Link to="/bookings" className="btn btn-gold btn-sm">
-            <Calendar className="w-4 h-4" size={16} />
+          </a>
+          <a
+            href="#booking"
+            onClick={(e) => scrollToSection(e, 'booking')}
+            className="btn btn-gold btn-sm"
+          >
+            <Calendar size={16} />
             <span>Book Ritual</span>
-          </Link>
+          </a>
         </nav>
 
         <button
@@ -64,7 +92,7 @@ export function Navbar() {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle navigation menu"
         >
-          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
@@ -73,57 +101,67 @@ export function Navbar() {
         <div className="mobile-drawer" onClick={() => setMobileMenuOpen(false)}>
           <div className="drawer-content" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
-              <Link to="/" className="brand-logo">
+              <a href="#hero" onClick={(e) => scrollToSection(e, 'hero')} className="brand-logo">
                 <img src="/hero.png" alt="Naurélle Logo" className="brand-logo-img" />
                 <span>Naurélle</span>
-              </Link>
+              </a>
               <button
                 className="mobile-toggle"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             <div className="drawer-links">
-              <Link
-                to="/"
-                className={location.pathname === '/' ? 'active' : ''}
+              <a
+                href="#hero"
+                onClick={(e) => scrollToSection(e, 'hero')}
+                className={activeSection === 'hero' ? 'active' : ''}
               >
                 Home
-              </Link>
-              <Link
-                to="/services"
-                className={location.pathname === '/services' ? 'active' : ''}
+              </a>
+              <a
+                href="#services"
+                onClick={(e) => scrollToSection(e, 'services')}
+                className={activeSection === 'services' ? 'active' : ''}
               >
                 Services Menu
-              </Link>
-              <Link
-                to="/gallery"
-                className={location.pathname === '/gallery' ? 'active' : ''}
+              </a>
+              <a
+                href="#gallery"
+                onClick={(e) => scrollToSection(e, 'gallery')}
+                className={activeSection === 'gallery' ? 'active' : ''}
               >
                 Gallery Showcase
-              </Link>
-              <Link
-                to="/policies"
-                className={location.pathname === '/policies' ? 'active' : ''}
+              </a>
+              <a
+                href="#policies"
+                onClick={(e) => scrollToSection(e, 'policies')}
+                className={activeSection === 'policies' ? 'active' : ''}
               >
                 Booking Policies
-              </Link>
-              <Link
-                to="/contact"
-                className={location.pathname === '/contact' ? 'active' : ''}
+              </a>
+              <a
+                href="#contact"
+                onClick={(e) => scrollToSection(e, 'contact')}
+                className={activeSection === 'contact' ? 'active' : ''}
               >
-                Contact & Studio Location
-              </Link>
+                Contact & Location
+              </a>
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '24px' }}>
-              <Link to="/bookings" className="btn btn-gold style-full" style={{ width: '100%' }}>
+              <a
+                href="#booking"
+                onClick={(e) => scrollToSection(e, 'booking')}
+                className="btn btn-gold style-full"
+                style={{ width: '100%' }}
+              >
                 <Sparkles size={18} />
                 <span>Book Appointment</span>
-              </Link>
+              </a>
             </div>
           </div>
         </div>

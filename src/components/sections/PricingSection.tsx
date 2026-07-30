@@ -1,41 +1,50 @@
-import { Link } from 'react-router-dom'
 import { Check, Sparkles, HelpCircle } from 'lucide-react'
 
 const pricingData = [
   {
-    name: 'Lash Lift',
-    price: '$95',
-    category: 'Lashes',
-    note: 'Includes deep lash conditioning & aftercare guidance',
-    features: ['Custom lift shield sizing', 'Keratin lash nourishment', 'Results last 6-8 weeks', 'Water resistant after 24 hrs'],
+    name: 'Gel Manicure',
+    price: '₵75',
+    category: 'Gel Polish',
+    note: 'Includes precision cuticle care & high-shine top coat',
+    features: ['Gentle cuticle e-file cleaning', 'Custom nude/blush shade match', 'High-shine gel top coat', 'Relaxing hand massage & oil'],
     popular: true
   },
   {
-    name: 'Lash Tint',
-    price: '$45',
-    category: 'Add-on / Standalone',
-    note: 'Perfect for definition, depth, and darker glossy lashes',
-    features: ['Custom color shade blend', 'Semi-permanent gloss tint', 'Zero mascara required', 'Takes only 25 minutes']
+    name: 'BIAB Builder Gel Overlay',
+    price: '₵95',
+    category: 'Natural Nail Builder',
+    note: 'Reinforces natural nail structure to promote healthy growth',
+    features: ['High-strength BIAB formula', 'Flawless apex structuring', 'Lasts up to 4 weeks', 'Prevents nail chipping & splitting']
   },
   {
-    name: 'Full Set',
-    price: '$120',
-    category: 'Lash Extensions',
-    note: 'Soft glam gel extension finish with custom styling',
-    features: ['1-on-1 style consultation', 'Lightweight silk fibers', 'Full lash line density', 'Complimentary lash wand']
+    name: 'Sculpted Acrylic Set',
+    price: '₵120',
+    category: 'Nail Extensions',
+    note: 'Bespoke sculpted extension set with custom shape & length',
+    features: ['1-on-1 shape consultation', 'Lightweight strong polymer', 'Includes 2 nail art accent nails', 'Complimentary aftercare kit']
   }
 ]
 
-export function PricingSection() {
+type PricingSectionProps = {
+  onSelectService?: (serviceName: string) => void
+}
+
+export function PricingSection({ onSelectService }: PricingSectionProps) {
+  const handleSelect = (e: React.MouseEvent, name: string) => {
+    e.preventDefault()
+    if (onSelectService) onSelectService(name)
+    document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
-    <section className="section" style={{ padding: '48px 0' }}>
+    <section className="section" id="pricing" style={{ padding: '48px 0', scrollMarginTop: '80px' }}>
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
         <div className="eyebrow" style={{ justifyContent: 'center' }}>
           <span>Transparent Pricing</span>
         </div>
-        <h2 className="section-title">Clear pricing for every signature treatment.</h2>
+        <h2 className="section-title">Clear pricing for every signature nail treatment.</h2>
         <p className="section-subtitle" style={{ margin: '0 auto' }}>
-          No hidden fees. Every appointment includes personal consultation, premium products, and post-treatment care advice.
+          No hidden fees. Every appointment includes personal consultation, medical-grade sanitization, and nourishing hand care.
         </p>
       </div>
 
@@ -100,13 +109,14 @@ export function PricingSection() {
               </ul>
             </div>
 
-            <Link
-              to={`/bookings?service=${encodeURIComponent(item.name)}`}
+            <a
+              href="#booking"
+              onClick={(e) => handleSelect(e, item.name)}
               className={`btn ${item.popular ? 'btn-gold' : 'btn-outline'} style-full`}
               style={{ width: '100%' }}
             >
               <span>Select Treatment</span>
-            </Link>
+            </a>
           </div>
         ))}
       </div>

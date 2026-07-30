@@ -4,7 +4,7 @@ export type Service = {
   price: string
   priceValue: number
   duration: string
-  category: 'lashes' | 'nails' | 'combo'
+  category: 'gel' | 'builder' | 'sculpted'
   description: string
   highlights: string[]
   image: string
@@ -23,7 +23,7 @@ export type PricingItem = {
 export type GalleryItem = {
   id: string
   title: string
-  category: 'lashes' | 'nails' | 'studio'
+  category: 'manicure' | 'builder' | 'art'
   description: string
   image: string
   featured?: boolean

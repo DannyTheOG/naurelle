@@ -1,74 +1,88 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Sparkles, Clock, CheckCircle2, ArrowRight } from 'lucide-react'
 import type { Service } from '../../types'
 
 const servicesData: Service[] = [
   {
-    id: 'lash-lift',
-    name: 'Classic Lash Lift',
-    price: '$95',
-    priceValue: 95,
-    duration: '60 mins',
-    category: 'lashes',
-    description: 'A soft, lifted lash look that opens the eyes beautifully and lasts 6 to 8 weeks effortless glow.',
-    highlights: ['Keratin lash boost', 'Aftercare nourishment guide', 'Custom curl mapping'],
-    image: '/lash-lift.png',
-    popular: true
-  },
-  {
     id: 'gel-manicure',
     name: 'Gel Manicure',
-    price: '$75',
+    price: '₵75',
     priceValue: 75,
     duration: '45 mins',
-    category: 'nails',
-    description: 'A glossy, chip-resistant manicure in your favourite nude, rose, or sparkle shimmer finish.',
-    highlights: ['Nail shaping & cuticle care', 'High-shine gel top coat', 'Relaxing hand massage'],
+    category: 'gel',
+    description: 'A glossy, chip-resistant gel manicure featuring precision cuticle care, nail shaping, and a high-shine nude top coat.',
+    highlights: ['Nail shaping & cuticle care', 'Non-toxic gel polish blend', 'High-shine chip-resistant finish'],
     image: '/gel-manicure.png',
     popular: true
   },
   {
-    id: 'hybrid-fill',
-    name: 'Hybrid Fill',
-    price: '$85',
-    priceValue: 85,
+    id: 'builder-gel',
+    name: 'BIAB Builder Gel Overlay',
+    price: '₵95',
+    priceValue: 95,
+    duration: '60 mins',
+    category: 'builder',
+    description: 'A strengthening builder gel overlay designed to protect natural nails, promote natural growth, and maintain a smooth nude apex.',
+    highlights: ['Natural nail reinforcement', 'Custom nude/blush shade match', 'Lasts 4+ weeks with refills'],
+    image: '/builder-gel.png',
+    popular: true
+  },
+  {
+    id: 'acrylic-set',
+    name: 'Sculpted Acrylic Full Set',
+    price: '₵120',
+    priceValue: 120,
     duration: '75 mins',
-    category: 'combo',
-    description: 'A fresh refill combining classic and volume fan lashes for a clean shape and long-lasting volume.',
-    highlights: ['Deep lash cleansing', 'Seamless fan placement', 'Lightweight comfortable finish'],
-    image: '/hybrid-fill.png'
+    category: 'sculpted',
+    description: 'Bespoke sculpted acrylic extensions with your preferred shape (almond, square, coffin) and optional gold French or metallic art.',
+    highlights: ['Lightweight strong structure', 'Custom length & shape mapping', 'Complimentary cuticle oil oil treatment'],
+    image: '/acrylic-set.png'
   }
 ]
 
-export function ServicesSection() {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'lashes' | 'nails' | 'combo'>('all')
+type ServicesSectionProps = {
+  onSelectService?: (serviceName: string) => void
+}
+
+export function ServicesSection({ onSelectService }: ServicesSectionProps) {
+  const [activeCategory, setActiveCategory] = useState<'all' | 'gel' | 'builder' | 'sculpted'>('all')
 
   const filteredServices = activeCategory === 'all'
     ? servicesData
     : servicesData.filter(s => s.category === activeCategory)
 
+  const handleBookClick = (e: React.MouseEvent, serviceName: string) => {
+    e.preventDefault()
+    if (onSelectService) {
+      onSelectService(serviceName)
+    }
+    const el = document.getElementById('booking')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
-    <section className="section" style={{ padding: '48px 0' }}>
+    <section className="section" id="services" style={{ padding: '48px 0', scrollMarginTop: '80px' }}>
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div className="eyebrow" style={{ justifyContent: 'center' }}>
-          <span>Signature Menu</span>
+          <span>Nail Tech Menu</span>
         </div>
-        <h2 className="section-title">Lash and nail rituals designed to feel elevated.</h2>
+        <h2 className="section-title">Signature nail rituals for every mood & moment.</h2>
         <p className="section-subtitle" style={{ margin: '0 auto' }}>
-          Select a signature service tailored to your style. Every visit includes private consultation and premium studio care.
+          Select a signature nail treatment tailored to your style. Every visit includes private consultation, hygiene-first care, and hand massage.
         </p>
 
         {/* Category Tabs */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '24px', flexWrap: 'wrap' }}>
-          {(['all', 'lashes', 'nails', 'combo'] as const).map((cat) => (
+          {(['all', 'gel', 'builder', 'sculpted'] as const).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`btn btn-sm ${activeCategory === cat ? 'btn-gold' : 'btn-outline'}`}
               style={{ textTransform: 'capitalize' }}
             >
-              {cat === 'all' ? 'All Treatments' : cat}
+              {cat === 'all' ? 'All Treatments' : cat === 'builder' ? 'BIAB Builder Gel' : cat}
             </button>
           ))}
         </div>
@@ -146,14 +160,15 @@ export function ServicesSection() {
                 ))}
               </div>
 
-              <Link
-                to={`/bookings?service=${encodeURIComponent(service.name)}`}
+              <a
+                href="#booking"
+                onClick={(e) => handleBookClick(e, service.name)}
                 className="btn btn-pink btn-sm style-full"
                 style={{ width: '100%', justifyContent: 'space-between' }}
               >
-                <span>Book This Ritual</span>
+                <span>Book This Treatment</span>
                 <ArrowRight size={16} />
-              </Link>
+              </a>
             </div>
           </article>
         ))}
