@@ -67,8 +67,8 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                     {!service.hasLengths && (
                       <span
                         style={{
-                          fontSize: '1.2rem',
-                          fontWeight: 500,
+                          fontSize: '1.25rem',
+                          fontWeight: 700,
                           color: 'var(--color-accent)',
                           fontFamily: 'var(--font-serif)'
                         }}
@@ -134,7 +134,7 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                         <span style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                           {length.name}
                         </span>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--color-accent)', fontFamily: 'var(--font-serif)' }}>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-accent)', fontFamily: 'var(--font-serif)' }}>
                           {length.displayPrice}
                         </span>
                       </div>

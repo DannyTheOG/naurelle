@@ -247,9 +247,9 @@ export function BookingSection({
         </div>
 
         {/* Booking Container Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '36px', alignItems: 'start' }}>
+        <div className="booking-layout-grid">
           {/* Main Interaction Area */}
-          <div className="surface-white" style={{ padding: '36px 32px' }}>
+          <div className="surface-white booking-card-main">
             {submitted ? (
               /* Success State */
               <div style={{ textAlign: 'center', padding: '24px 8px' }}>
@@ -300,7 +300,7 @@ export function BookingSection({
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Estimated Total:</span>
-                    <strong style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-serif)', fontSize: '1.1rem' }}>
+                    <strong style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-serif)', fontSize: '1.15rem', fontWeight: 700 }}>
                       ₵{calculatePrice()}
                     </strong>
                   </div>
@@ -366,7 +366,7 @@ export function BookingSection({
                                 style={{
                                   fontFamily: 'var(--font-serif)',
                                   fontSize: '1.25rem',
-                                  fontWeight: 500,
+                                  fontWeight: 700,
                                   color: isSelected ? 'var(--color-accent)' : 'var(--text-primary)'
                                 }}
                               >
@@ -425,7 +425,8 @@ export function BookingSection({
                                 <span
                                   style={{
                                     fontFamily: 'var(--font-serif)',
-                                    fontSize: '1.1rem',
+                                    fontSize: '1.15rem',
+                                    fontWeight: 700,
                                     color: isToeSelected ? 'var(--color-accent)' : 'var(--text-primary)'
                                   }}
                                 >
@@ -478,7 +479,7 @@ export function BookingSection({
                                 style={{
                                   fontFamily: 'var(--font-serif)',
                                   fontSize: '1.3rem',
-                                  fontWeight: 500,
+                                  fontWeight: 700,
                                   color: isSelected ? 'var(--color-accent)' : 'var(--text-primary)'
                                 }}
                               >
@@ -506,7 +507,7 @@ export function BookingSection({
                       })}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="booking-actions-row">
                       <button
                         onClick={() => setCurrentStep(1)}
                         className="btn btn-minimal btn-sm"
@@ -603,7 +604,7 @@ export function BookingSection({
                       </p>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="booking-actions-row">
                       <button
                         onClick={() => {
                           if (selectedService?.hasLengths) {
@@ -701,7 +702,7 @@ export function BookingSection({
                       </p>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="booking-actions-row">
                       <button
                         type="button"
                         onClick={() => setCurrentStep(3)}
@@ -716,7 +717,6 @@ export function BookingSection({
                         type="submit"
                         className="btn btn-burgundy"
                         disabled={submitting}
-                        style={{ padding: '14px 32px' }}
                       >
                         <span>{submitting ? 'Sending Request...' : 'Confirm Appointment'}</span>
                       </button>
@@ -781,7 +781,7 @@ export function BookingSection({
                   style={{
                     fontFamily: 'var(--font-serif)',
                     fontSize: '1.8rem',
-                    fontWeight: 500,
+                    fontWeight: 700,
                     color: 'var(--color-accent)'
                   }}
                 >

@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { galleryItems } from '../../config/studioConfig'
 import type { GalleryCategory, GalleryItem } from '../../types'
 import { Modal } from '../ui/Modal'
-import { Maximize2 } from 'lucide-react'
+import { Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const categories: { key: GalleryCategory; label: string }[] = [
   { key: 'all', label: 'All Work' },
@@ -17,6 +17,29 @@ const categories: { key: GalleryCategory; label: string }[] = [
 export function GallerySection() {
   const [activeCategory, setActiveCategory] = useState<GalleryCategory>('all')
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
+
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  const checkScroll = () => {
+    if (tabsRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current
+      const maxScroll = scrollWidth - clientWidth
+      setCanScrollLeft(scrollLeft > 6)
+      setCanScrollRight(scrollLeft < maxScroll - 6)
+      if (maxScroll > 0) {
+        setScrollProgress(Math.min(1, Math.max(0, scrollLeft / maxScroll)))
+      }
+    }
+  }
+
+  useEffect(() => {
+    checkScroll()
+    window.addEventListener('resize', checkScroll)
+    return () => window.removeEventListener('resize', checkScroll)
+  }, [])
 
   const filteredItems = activeCategory === 'all'
     ? galleryItems
@@ -34,51 +57,76 @@ export function GallerySection() {
           </p>
         </div>
 
-        {/* Minimal Category Filter Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            flexWrap: 'wrap',
-            marginBottom: '40px',
-            borderBottom: '1px solid var(--border-light)',
-            paddingBottom: '16px'
-          }}
-        >
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '6px 12px',
-                fontSize: '0.8rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 500,
-                color: activeCategory === cat.key ? 'var(--color-accent)' : 'var(--text-muted)',
-                position: 'relative',
-                transition: 'color var(--transition-fast)',
-                cursor: 'pointer'
-              }}
-            >
-              {cat.label}
-              {activeCategory === cat.key && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    bottom: '-17px',
-                    left: 0,
-                    width: '100%',
-                    height: '1px',
-                    backgroundColor: 'var(--color-accent)'
-                  }}
-                />
-              )}
-            </button>
-          ))}
+        {/* Minimal Category Filter Tabs with Mobile Slide Track & Indicators */}
+        <div className="gallery-tabs-wrapper">
+          {canScrollLeft && (
+            <div className="gallery-fade-left">
+              <button
+                type="button"
+                className="gallery-scroll-arrow"
+                onClick={() => tabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
+                aria-label="Slide tabs left"
+              >
+                <ChevronLeft size={16} />
+              </button>
+            </div>
+          )}
+
+          <div
+            ref={tabsRef}
+            onScroll={checkScroll}
+            className="gallery-filter-tabs"
+            role="tablist"
+            aria-label="Gallery categories"
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat.key}
+                role="tab"
+                aria-selected={activeCategory === cat.key}
+                onClick={(e) => {
+                  setActiveCategory(cat.key)
+                  e.currentTarget.scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center',
+                    block: 'nearest'
+                  })
+                }}
+                className={`gallery-filter-tab-btn ${activeCategory === cat.key ? 'active' : ''}`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {canScrollRight && (
+            <div className="gallery-fade-right">
+              <button
+                type="button"
+                className="gallery-scroll-arrow"
+                onClick={() => tabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
+                aria-label="Slide tabs right"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* Visual Indicator of sliding for mobile */}
+          <div className="gallery-slide-indicator-mobile" aria-hidden="true">
+            <span className="gallery-slide-hint">
+              <span>Slide categories</span>
+              <span>&rarr;</span>
+            </span>
+            <div className="gallery-slide-progress-track">
+              <div
+                className="gallery-slide-progress-bar"
+                style={{
+                  transform: `translateX(${scrollProgress * 150}%)`
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Editorial Photo Grid */}

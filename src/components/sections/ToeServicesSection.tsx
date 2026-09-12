@@ -63,7 +63,7 @@ export function ToeServicesSection({ onSelectToeService }: ToeServicesSectionPro
                     style={{
                       fontSize: '1.25rem',
                       fontFamily: 'var(--font-serif)',
-                      fontWeight: 500,
+                      fontWeight: 700,
                       color: 'var(--color-accent)'
                     }}
                   >
