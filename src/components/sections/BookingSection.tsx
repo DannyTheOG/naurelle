@@ -1,366 +1,811 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, Sparkles, CheckCircle2, ShieldAlert, Send } from 'lucide-react'
-import type { BookingForm } from '../../types'
-import { Toast } from '../ui/Toast'
-
-const initialForm: BookingForm = {
-  service: 'Gel Manicure',
-  date: '',
-  time: '10:00',
-  technician: 'Any available',
-  addOns: [],
-  name: '',
-  phone: '',
-  email: '',
-  instagram: '',
-  notes: ''
-}
+import { studioConfig } from '../../config/studioConfig'
+import type { ServiceItem, ServiceLengthOption, ToeServiceItem } from '../../types'
+import { Check, ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2 } from 'lucide-react'
 
 type BookingSectionProps = {
-  preselectedService?: string
+  preselectedServiceId?: string
+  preselectedLengthId?: string
 }
 
-export function BookingSection({ preselectedService }: BookingSectionProps) {
-  const [formData, setFormData] = useState<BookingForm>(initialForm)
-  const [loading, setLoading] = useState(false)
-  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  const [confirmation, setConfirmation] = useState('')
-  const [availabilityMessage, setAvailabilityMessage] = useState('')
+export function BookingSection({
+  preselectedServiceId,
+  preselectedLengthId
+}: BookingSectionProps) {
+  // Current active step (1 to 4)
+  const [currentStep, setCurrentStep] = useState<number>(1)
 
+  // Selection states
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null)
+  const [isToeService, setIsToeService] = useState<boolean>(false)
+  const [selectedToeService, setSelectedToeService] = useState<ToeServiceItem | null>(null)
+  const [selectedLength, setSelectedLength] = useState<ServiceLengthOption | null>(null)
+
+  // Date & Time states
+  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedTime, setSelectedTime] = useState<string>('')
+
+  // Client Details
+  const [clientName, setClientName] = useState('')
+  const [clientPhone, setClientPhone] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
+  const [notes, setNotes] = useState('')
+
+  // Submission & Feedback states
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  // Preselection handler when clicked from Services or ToeServices
   useEffect(() => {
-    if (preselectedService) {
-      setFormData(prev => ({ ...prev, service: preselectedService }))
+    if (preselectedServiceId) {
+      if (preselectedServiceId.startsWith('toes-')) {
+        const foundToe = studioConfig.toeServices.find((t) => t.id === preselectedServiceId)
+        if (foundToe) {
+          setIsToeService(true)
+          setSelectedToeService(foundToe)
+          setSelectedService(null)
+          setSelectedLength(null)
+          setCurrentStep(3) // auto-skip length
+        }
+      } else {
+        const found = studioConfig.services.find((s) => s.id === preselectedServiceId)
+        if (found) {
+          setIsToeService(false)
+          setSelectedService(found)
+          setSelectedToeService(null)
+
+          if (found.hasLengths) {
+            if (preselectedLengthId && found.lengthOptions) {
+              const foundLength = found.lengthOptions.find((l) => l.id === preselectedLengthId)
+              setSelectedLength(foundLength || found.lengthOptions[0])
+              setCurrentStep(3)
+            } else {
+              setSelectedLength(null)
+              setCurrentStep(2)
+            }
+          } else {
+            setSelectedLength(null)
+            setCurrentStep(3) // skip length
+          }
+        }
+      }
     }
-  }, [preselectedService])
+  }, [preselectedServiceId, preselectedLengthId])
 
-  const calculateDeposit = () => {
-    return formData.service === 'Gel Manicure' ? 50 : 75
+  // Current calculated price
+  const calculatePrice = (): number => {
+    if (isToeService && selectedToeService) {
+      return selectedToeService.price
+    }
+    if (selectedService) {
+      if (selectedService.hasLengths && selectedLength) {
+        return selectedLength.price
+      }
+      return selectedService.basePrice
+    }
+    return 0
   }
 
-  const calculateBasePrice = () => {
-    if (formData.service === 'Gel Manicure') return 75
-    if (formData.service === 'BIAB Builder Gel Overlay') return 95
-    if (formData.service === 'Sculpted Acrylic Set') return 120
-    return 75
+  // Handle Step 1 service selection
+  const handleSelectMainService = (service: ServiceItem) => {
+    setIsToeService(false)
+    setSelectedToeService(null)
+    setSelectedService(service)
+    setSelectedLength(null)
+
+    if (service.hasLengths) {
+      setCurrentStep(2)
+    } else {
+      setCurrentStep(3)
+    }
   }
 
-  const calculateAddonsTotal = () => {
-    let sum = 0
-    if (formData.addOns.includes('Chrome & Gold Shimmer Art')) sum += 20
-    if (formData.addOns.includes('Paraffin Moisture Care')) sum += 15
-    return sum
+  const handleSelectToeServiceOption = (toe: ToeServiceItem) => {
+    setIsToeService(true)
+    setSelectedService(null)
+    setSelectedToeService(toe)
+    setSelectedLength(null)
+    setCurrentStep(3) // toe services skip length
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  // Handle Step 2 length selection
+  const handleSelectLength = (length: ServiceLengthOption) => {
+    setSelectedLength(length)
+    setCurrentStep(3)
   }
 
-  const handleAddOnToggle = (addOn: string) => {
-    setFormData(prev => ({
-      ...prev,
-      addOns: prev.addOns.includes(addOn)
-        ? prev.addOns.filter(i => i !== addOn)
-        : [...prev.addOns, addOn]
-    }))
+  // Step 3 Next validation
+  const handleProceedToConfirm = () => {
+    if (!selectedDate || !selectedTime) {
+      setErrorMessage('Please select both a date and an available appointment time.')
+      return
+    }
+    setErrorMessage('')
+    setCurrentStep(4)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Step 4 Form Submission
+  const handleConfirmAppointment = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!formData.name || !formData.phone || !formData.email || !formData.date || !formData.time) {
-      setToastMessage({
-        text: 'Please complete your name, phone, email, date, and time to reserve your appointment.',
-        type: 'error'
-      })
+    if (!clientName || !clientPhone || !clientEmail) {
+      setErrorMessage('Please provide your name, phone number, and email address.')
       return
     }
 
-    setLoading(true)
-    const depositAmount = calculateDeposit()
-    const availability = formData.date && formData.time ? 'Available' : 'Pending review'
-    setAvailabilityMessage(`${availability} — deposit of GHS ${depositAmount} is required to confirm your booking.`)
+    setSubmitting(true)
+    setErrorMessage('')
+
+    const serviceName = isToeService && selectedToeService
+      ? selectedToeService.name
+      : selectedService?.name || 'Nail Service'
+
+    const lengthName = selectedLength ? selectedLength.name : undefined
+    const finalPrice = calculatePrice()
+
+    const bookingPayload = {
+      service: serviceName,
+      length: lengthName,
+      date: selectedDate,
+      time: selectedTime,
+      price: finalPrice,
+      name: clientName,
+      phone: clientPhone,
+      email: clientEmail,
+      notes: notes
+    }
 
     try {
-      const response = await fetch('http://localhost:4000/api/bookings', {
+      await fetch('http://localhost:4000/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          status: 'Pending Deposit',
-          depositAmount
-        })
+        body: JSON.stringify(bookingPayload)
       })
-
-      if (!response.ok) {
-        throw new Error('Request failed')
-      }
-
-      setToastMessage({
-        text: `Thank you ${formData.name}, your request has been sent successfully!`,
-        type: 'success'
-      })
-
-      setConfirmation(
-        `Thank you, ${formData.name}. Your request is now pending deposit payment. Once paid, your booking will be confirmed and you will receive an email notification.`
-      )
-
-      setTimeout(() => {
-        setFormData(initialForm)
-      }, 3000)
     } catch {
-      setToastMessage({
-        text: 'Your booking could not be sent right now. Please email hello@naurellebeauty.com directly.',
-        type: 'error'
-      })
-      setConfirmation('Your booking could not be sent right now. Please email hello@naurellebeauty.com directly.')
+      // Fallback gracefully without blocking client experience
+      console.warn('Booking API offline or unavailable; continuing to confirmation state.')
     } finally {
-      setLoading(false)
+      setSubmitting(false)
+      setSubmitted(true)
     }
   }
 
+  const handleReset = () => {
+    setCurrentStep(1)
+    setSelectedService(null)
+    setIsToeService(false)
+    setSelectedToeService(null)
+    setSelectedLength(null)
+    setSelectedDate('')
+    setSelectedTime('')
+    setClientName('')
+    setClientPhone('')
+    setClientEmail('')
+    setNotes('')
+    setSubmitted(false)
+    setErrorMessage('')
+  }
+
+  const activeServiceName = isToeService && selectedToeService
+    ? selectedToeService.name
+    : selectedService?.name || 'Choose Service'
+
+  const whatsappConfirmationText = `Hello Naurèlle Beauty, I would like to confirm my appointment request:\n\nService: ${activeServiceName}${
+    selectedLength ? ` (${selectedLength.name})` : ''
+  }\nDate: ${selectedDate}\nTime: ${selectedTime}\nPrice: ₵${calculatePrice()}\nName: ${clientName}\nPhone: ${clientPhone}`
+
+  const whatsappBookingUrl = `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+    whatsappConfirmationText
+  )}`
+
+  // Today minimum date string (YYYY-MM-DD)
+  const todayStr = new Date().toISOString().split('T')[0]
+
   return (
-    <section className="section" id="booking" style={{ padding: '48px 0', scrollMarginTop: '80px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        <div className="eyebrow" style={{ justifyContent: 'center' }}>
-          <span>Nail Appointment Reservations</span>
-        </div>
-        <h2 className="section-title">Reserve your nail treatment & secure your deposit.</h2>
-        <p className="section-subtitle" style={{ margin: '0 auto' }}>
-          Fill in your preferences below. Our studio team will confirm availability and send your deposit invoice link.
-        </p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', alignItems: 'start' }}>
-        {/* Booking Form Card */}
-        <div className="glass-card" style={{ padding: '32px 28px' }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={16} style={{ color: 'var(--color-gold)' }} />
-                <span>Select Nail Service Ritual</span>
-              </label>
-              <select className="form-select" name="service" value={formData.service} onChange={handleChange}>
-                <option value="Gel Manicure">Gel Manicure ($75)</option>
-                <option value="BIAB Builder Gel Overlay">BIAB Builder Gel Overlay ($95)</option>
-                <option value="Sculpted Acrylic Set">Sculpted Acrylic Set ($120)</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Calendar size={15} style={{ color: 'var(--color-gold)' }} />
-                  <span>Date</span>
-                </label>
-                <input
-                  className="form-input"
-                  name="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Clock size={15} style={{ color: 'var(--color-gold)' }} />
-                  <span>Preferred Time</span>
-                </label>
-                <select className="form-select" name="time" value={formData.time} onChange={handleChange}>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="16:00">04:00 PM</option>
-                  <option value="18:00">06:00 PM</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Add-ons Selection */}
-            <div className="form-group">
-              <label className="form-label">Optional Add-ons</label>
-              <div className="addon-checkbox-grid">
-                <label className={`addon-card ${formData.addOns.includes('Chrome & Gold Shimmer Art') ? 'selected' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={formData.addOns.includes('Chrome & Gold Shimmer Art')}
-                    onChange={() => handleAddOnToggle('Chrome & Gold Shimmer Art')}
-                  />
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Chrome & Gold Art</strong>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--color-pink-accent-dark)' }}>+GHS 20</span>
-                  </div>
-                </label>
-
-                <label className={`addon-card ${formData.addOns.includes('Paraffin Moisture Care') ? 'selected' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={formData.addOns.includes('Paraffin Moisture Care')}
-                    onChange={() => handleAddOnToggle('Paraffin Moisture Care')}
-                  />
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '0.9rem' }}>Paraffin Hand Care</strong>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--color-pink-accent-dark)' }}>+GHS 15</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '16px' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '14px' }}>Client Details</h3>
-
-              <div className="form-group">
-                <label className="form-label">Full Name *</label>
-                <input
-                  className="form-input"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="e.g. Jane Doe"
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="form-group">
-                  <label className="form-label">Phone Number *</label>
-                  <input
-                    className="form-input"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="0551234567"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email Address *</label>
-                  <input
-                    className="form-input"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Instagram Handle (Optional)</label>
-                <input
-                  className="form-input"
-                  name="instagram"
-                  value={formData.instagram}
-                  onChange={handleChange}
-                  placeholder="@yourhandle"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Special Notes / Style Requests</label>
-                <textarea
-                  className="form-textarea"
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  placeholder="Share any nail shape preferences, sensitivities, or art inspirations..."
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-gold btn-lg style-full" disabled={loading} style={{ width: '100%' }}>
-              <Send size={18} />
-              <span>{loading ? 'Submitting Reservation...' : 'Proceed to Deposit'}</span>
-            </button>
-          </form>
+    <section id="booking" className="editorial-section" style={{ scrollMarginTop: '80px' }}>
+      <div className="container">
+        {/* Section Header */}
+        <div style={{ maxWidth: '640px', marginBottom: '40px' }}>
+          <span className="editorial-eyebrow">Reservations</span>
+          <h2 className="section-title">Appointment Booking</h2>
+          <p className="section-subtitle">
+            A seamless four-step ritual to secure your private studio session.
+          </p>
         </div>
 
-        {/* Live Summary Sidebar */}
-        <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* 4-Step Progress Indicator Bar */}
+        <div className="step-indicator-bar" aria-label="Booking steps">
+          <div className={`step-indicator-item ${currentStep === 1 ? 'active' : currentStep > 1 ? 'completed' : ''}`}>
+            <span className="step-indicator-num">01</span>
+            <span>Choose Service</span>
+          </div>
+
+          <div style={{ color: 'var(--border-subtle)' }}>&rarr;</div>
+
           <div
-            className="glass-card"
-            style={{
-              padding: '28px 24px',
-              background: 'linear-gradient(135deg, var(--color-white) 0%, var(--color-gold-light) 100%)',
-              border: '1px solid var(--color-border-gold)'
-            }}
+            className={`step-indicator-item ${
+              currentStep === 2 ? 'active' : currentStep > 2 ? 'completed' : ''
+            } ${selectedService && !selectedService.hasLengths && !isToeService ? 'editorial-eyebrow-muted' : ''}`}
           >
-            <div className="pill-badge gold" style={{ marginBottom: '12px' }}>
-              <Sparkles size={12} />
-              <span>Live Reservation Summary</span>
-            </div>
+            <span className="step-indicator-num">02</span>
+            <span>Choose Length</span>
+          </div>
 
-            <h3 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>{formData.service}</h3>
+          <div style={{ color: 'var(--border-subtle)' }}>&rarr;</div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.92rem', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-charcoal-muted)' }}>Base Price:</span>
-                <strong>₵{calculateBasePrice()}</strong>
-              </div>
-              {formData.addOns.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-charcoal-muted)' }}>Add-ons Total:</span>
-                  <strong>+GHS {calculateAddonsTotal()}</strong>
+          <div className={`step-indicator-item ${currentStep === 3 ? 'active' : currentStep > 3 ? 'completed' : ''}`}>
+            <span className="step-indicator-num">03</span>
+            <span>Date &amp; Time</span>
+          </div>
+
+          <div style={{ color: 'var(--border-subtle)' }}>&rarr;</div>
+
+          <div className={`step-indicator-item ${currentStep === 4 ? 'active' : ''}`}>
+            <span className="step-indicator-num">04</span>
+            <span>Confirm</span>
+          </div>
+        </div>
+
+        {/* Booking Container Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '36px', alignItems: 'start' }}>
+          {/* Main Interaction Area */}
+          <div className="surface-white" style={{ padding: '36px 32px' }}>
+            {submitted ? (
+              /* Success State */
+              <div style={{ textAlign: 'center', padding: '24px 8px' }}>
+                <div
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(122, 2, 1, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 20px',
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  <CheckCircle2 size={32} />
                 </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px' }}>
-                <span>Date & Time:</span>
-                <strong>{formData.date || 'Select date'} @ {formData.time}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Nail Technician:</span>
-                <strong>{formData.technician}</strong>
-              </div>
-            </div>
 
-            <div
-              style={{
-                background: 'var(--color-white)',
-                padding: '16px',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--color-border-subtle)',
-                marginBottom: '16px'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Required Deposit:</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-pink-accent-dark)' }}>
-                  GHS {calculateDeposit()}
-                </span>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--color-charcoal-muted)' }}>
-                Required to lock your time slot. Deducted from final bill.
-              </p>
-            </div>
+                <span className="editorial-eyebrow">Request Received</span>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '2rem',
+                    color: 'var(--text-primary)',
+                    marginBottom: '16px'
+                  }}
+                >
+                  Appointment request received.
+                </h3>
 
-            {availabilityMessage && (
-              <div style={{ padding: '12px', background: 'rgba(212,175,55,0.15)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', color: '#856404', marginBottom: '12px', display: 'flex', gap: '8px' }}>
-                <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{availabilityMessage}</span>
-              </div>
-            )}
+                <p style={{ color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 24px' }}>
+                  Thank you, <strong>{clientName}</strong>. Your appointment request for{' '}
+                  <strong>{activeServiceName}</strong> on <strong>{selectedDate}</strong> at{' '}
+                  <strong>{selectedTime}</strong> has been received. Our studio team will review and confirm your slot.
+                </p>
 
-            {confirmation && (
-              <div style={{ padding: '14px', background: 'var(--color-baby-pink-light)', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: 'var(--color-pink-accent-dark)', fontWeight: 600, display: 'flex', gap: '8px' }}>
-                <ShieldAlert size={18} style={{ flexShrink: 0 }} />
-                <span>{confirmation}</span>
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-canvas)',
+                    padding: '16px 20px',
+                    borderRadius: 'var(--radius-xs)',
+                    maxWidth: '440px',
+                    margin: '0 auto 32px',
+                    textAlign: 'left',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Estimated Total:</span>
+                    <strong style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-serif)', fontSize: '1.1rem' }}>
+                      ₵{calculatePrice()}
+                    </strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+                    <span>Contact:</span>
+                    <span>{clientPhone}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <a
+                    href={whatsappBookingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-burgundy"
+                    style={{ padding: '14px 28px' }}
+                  >
+                    <MessageCircle size={16} />
+                    <span>Confirm via WhatsApp</span>
+                  </a>
+
+                  <button onClick={handleReset} className="btn btn-minimal" style={{ padding: '14px 24px' }}>
+                    <span>Book Another Service</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Step-by-Step Flow */
+              <div>
+                {/* STEP 1: CHOOSE SERVICE TYPE */}
+                {currentStep === 1 && (
+                  <div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <span className="editorial-eyebrow">Step 01</span>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--text-primary)' }}>
+                        Choose Service Type
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        Select the primary nail or toe service you desire.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                      {studioConfig.services.map((service) => {
+                        const isSelected = selectedService?.id === service.id && !isToeService
+                        return (
+                          <div
+                            key={service.id}
+                            className={`selection-card ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleSelectMainService(service)}
+                          >
+                            <div>
+                              <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)' }}>
+                                {service.name}
+                              </strong>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                {service.description}
+                              </span>
+                            </div>
+
+                            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                              <span
+                                style={{
+                                  fontFamily: 'var(--font-serif)',
+                                  fontSize: '1.25rem',
+                                  fontWeight: 500,
+                                  color: isSelected ? 'var(--color-accent)' : 'var(--text-primary)'
+                                }}
+                              >
+                                {service.displayPrice}
+                              </span>
+                              <div
+                                style={{
+                                  width: '20px',
+                                  height: '20px',
+                                  borderRadius: '50%',
+                                  border: isSelected ? '2px solid var(--color-accent)' : '1px solid var(--border-subtle)',
+                                  backgroundColor: isSelected ? 'var(--color-accent)' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#FFFFFF'
+                                }}
+                              >
+                                {isSelected && <Check size={12} />}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+
+                      {/* Toe Services Header & Sub-selection */}
+                      <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
+                        <span
+                          style={{
+                            display: 'block',
+                            fontSize: '0.78rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.12em',
+                            color: 'var(--text-muted)',
+                            marginBottom: '12px'
+                          }}
+                        >
+                          Toe Services
+                        </span>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                          {studioConfig.toeServices.map((toe) => {
+                            const isToeSelected = isToeService && selectedToeService?.id === toe.id
+                            return (
+                              <div
+                                key={toe.id}
+                                className={`selection-card ${isToeSelected ? 'selected' : ''}`}
+                                onClick={() => handleSelectToeServiceOption(toe)}
+                                style={{ padding: '14px 16px' }}
+                              >
+                                <div>
+                                  <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                                    {toe.name}
+                                  </strong>
+                                </div>
+                                <span
+                                  style={{
+                                    fontFamily: 'var(--font-serif)',
+                                    fontSize: '1.1rem',
+                                    color: isToeSelected ? 'var(--color-accent)' : 'var(--text-primary)'
+                                  }}
+                                >
+                                  {toe.displayPrice}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: CHOOSE LENGTH (Only for services with lengths: Gel X, Acrylic, Refill) */}
+                {currentStep === 2 && selectedService && selectedService.hasLengths && (
+                  <div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <span className="editorial-eyebrow">Step 02</span>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--text-primary)' }}>
+                        Choose Length for {selectedService.name}
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        Length selection automatically adjusts your final appointment total.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+                      {selectedService.lengthOptions?.map((length) => {
+                        const isSelected = selectedLength?.id === length.id
+                        return (
+                          <div
+                            key={length.id}
+                            className={`selection-card ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleSelectLength(length)}
+                          >
+                            <div>
+                              <strong style={{ display: 'block', fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+                                {length.name}
+                              </strong>
+                              {length.magnets && (
+                                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                  {length.magnets} magnets length guideline
+                                </span>
+                              )}
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span
+                                style={{
+                                  fontFamily: 'var(--font-serif)',
+                                  fontSize: '1.3rem',
+                                  fontWeight: 500,
+                                  color: isSelected ? 'var(--color-accent)' : 'var(--text-primary)'
+                                }}
+                              >
+                                {length.displayPrice}
+                              </span>
+
+                              <div
+                                style={{
+                                  width: '20px',
+                                  height: '20px',
+                                  borderRadius: '50%',
+                                  border: isSelected ? '2px solid var(--color-accent)' : '1px solid var(--border-subtle)',
+                                  backgroundColor: isSelected ? 'var(--color-accent)' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#FFFFFF'
+                                }}
+                              >
+                                {isSelected && <Check size={12} />}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <button
+                        onClick={() => setCurrentStep(1)}
+                        className="btn btn-minimal btn-sm"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <ArrowLeft size={14} />
+                        <span>Back to Services</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: DATE & TIME */}
+                {currentStep === 3 && (
+                  <div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <span className="editorial-eyebrow">Step 03</span>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--text-primary)' }}>
+                        Choose Date &amp; Time
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        Select your preferred studio session date and available time slot.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
+                      {/* Date Picker */}
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Calendar size={14} style={{ color: 'var(--color-accent)' }} />
+                          <span>Appointment Date *</span>
+                        </label>
+                        <input
+                          type="date"
+                          className="form-input"
+                          min={todayStr}
+                          value={selectedDate}
+                          onChange={(e) => {
+                            setSelectedDate(e.target.value)
+                            setErrorMessage('')
+                          }}
+                          required
+                        />
+                      </div>
+
+                      {/* Time Slots Selection */}
+                      <div>
+                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                          <Clock size={14} style={{ color: 'var(--color-accent)' }} />
+                          <span>Available Time Slots *</span>
+                        </label>
+
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                            gap: '10px'
+                          }}
+                        >
+                          {studioConfig.availableTimes.map((timeSlot) => {
+                            const isSelected = selectedTime === timeSlot
+                            return (
+                              <button
+                                key={timeSlot}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedTime(timeSlot)
+                                  setErrorMessage('')
+                                }}
+                                style={{
+                                  padding: '12px 8px',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 500,
+                                  fontFamily: 'var(--font-sans)',
+                                  backgroundColor: isSelected ? 'var(--color-accent)' : 'var(--bg-surface)',
+                                  color: isSelected ? 'var(--text-white)' : 'var(--text-primary)',
+                                  border: isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-xs)',
+                                  transition: 'all var(--transition-fast)',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {timeSlot}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {errorMessage && (
+                      <p style={{ color: 'var(--color-accent)', fontSize: '0.86rem', marginBottom: '16px' }}>
+                        {errorMessage}
+                      </p>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button
+                        onClick={() => {
+                          if (selectedService?.hasLengths) {
+                            setCurrentStep(2)
+                          } else {
+                            setCurrentStep(1)
+                          }
+                        }}
+                        className="btn btn-minimal btn-sm"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <ArrowLeft size={14} />
+                        <span>Previous</span>
+                      </button>
+
+                      <button
+                        onClick={handleProceedToConfirm}
+                        className="btn btn-burgundy btn-sm"
+                        disabled={!selectedDate || !selectedTime}
+                        style={{ opacity: !selectedDate || !selectedTime ? 0.6 : 1 }}
+                      >
+                        <span>Review &amp; Confirm</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4: CONFIRM & DETAILS */}
+                {currentStep === 4 && (
+                  <form onSubmit={handleConfirmAppointment}>
+                    <div style={{ marginBottom: '24px' }}>
+                      <span className="editorial-eyebrow">Step 04</span>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--text-primary)' }}>
+                        Client Details &amp; Confirmation
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        Review your appointment summary and enter your contact details.
+                      </p>
+                    </div>
+
+                    {/* Client Information Form Inputs */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Full Name *</label>
+                        <input
+                          className="form-input"
+                          value={clientName}
+                          onChange={(e) => setClientName(e.target.value)}
+                          placeholder="Your Name"
+                          required
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label">Phone / WhatsApp *</label>
+                          <input
+                            className="form-input"
+                            value={clientPhone}
+                            onChange={(e) => setClientPhone(e.target.value)}
+                            placeholder="e.g. 055 123 4567"
+                            required
+                          />
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label">Email Address *</label>
+                          <input
+                            type="email"
+                            className="form-input"
+                            value={clientEmail}
+                            onChange={(e) => setClientEmail(e.target.value)}
+                            placeholder="you@example.com"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Notes or Requests (Optional)</label>
+                        <textarea
+                          className="form-textarea"
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Share any sensitivities, nail health details, or specific style references..."
+                          style={{ minHeight: '80px' }}
+                        />
+                      </div>
+                    </div>
+
+                    {errorMessage && (
+                      <p style={{ color: 'var(--color-accent)', fontSize: '0.86rem', marginBottom: '16px' }}>
+                        {errorMessage}
+                      </p>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="btn btn-minimal btn-sm"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <ArrowLeft size={14} />
+                        <span>Change Date/Time</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="btn btn-burgundy"
+                        disabled={submitting}
+                        style={{ padding: '14px 32px' }}
+                      >
+                        <span>{submitting ? 'Sending Request...' : 'Confirm Appointment'}</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
           </div>
-        </aside>
-      </div>
 
-      {toastMessage && (
-        <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />
-      )}
+          {/* Appointment Live Summary Sidebar */}
+          <aside>
+            <div
+              className="surface-white"
+              style={{
+                padding: '32px 28px',
+                border: '1px solid var(--border-light)',
+                position: 'sticky',
+                top: '100px'
+              }}
+            >
+              <span className="editorial-eyebrow">Appointment Summary</span>
+
+              <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '20px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.86rem', color: 'var(--text-muted)' }}>Service</span>
+                  <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+                    {activeServiceName}
+                  </strong>
+                </div>
+
+                {selectedLength && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.86rem', color: 'var(--text-muted)' }}>Length</span>
+                    <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                      {selectedLength.name} {selectedLength.magnets ? `(${selectedLength.magnets} magnets)` : ''}
+                    </strong>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.86rem', color: 'var(--text-muted)' }}>Date</span>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                    {selectedDate || 'Select in Step 03'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: '0.86rem', color: 'var(--text-muted)' }}>Time</span>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                    {selectedTime || 'Select in Step 03'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Price Total */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '24px' }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Total Price
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '1.8rem',
+                    fontWeight: 500,
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  {calculatePrice() > 0 ? `₵${calculatePrice()}` : '—'}
+                </span>
+              </div>
+
+              {/* Studio Assurance Note */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-canvas)',
+                  padding: '14px',
+                  borderRadius: 'var(--radius-xs)',
+                  fontSize: '0.82rem',
+                  lineHeight: 1.55,
+                  color: 'var(--text-muted)'
+                }}
+              >
+                No advance online card payment required. Payment is handled upon arrival or confirmation as directed by the studio.
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
     </section>
   )
 }

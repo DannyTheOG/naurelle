@@ -1,236 +1,329 @@
 import { useState } from 'react'
-import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Video, Sparkles, Navigation } from 'lucide-react'
-import { Toast } from '../ui/Toast'
+import { studioConfig } from '../../config/studioConfig'
+import { MessageCircle, Send, CheckCircle2, Phone, Mail } from 'lucide-react'
+
+const InstagramIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+)
 
 export function ContactSection() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
-  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [message, setMessage] = useState('')
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.email || !formData.message) {
-      setToastMessage({ text: 'Please complete all fields in the contact form.', type: 'error' })
+    if (!name || !email || !message) {
+      setErrorMessage('Please fill in your name, email, and message.')
       return
     }
-    setToastMessage({ text: `Thank you, ${formData.name}. Your message has been received!`, type: 'success' })
-    setFormData({ name: '', email: '', message: '' })
+
+    setLoading(true)
+    setErrorMessage('')
+
+    // Simulate sending message
+    setTimeout(() => {
+      setLoading(false)
+      setSuccess(true)
+      setName('')
+      setEmail('')
+      setPhone('')
+      setMessage('')
+    }, 600)
   }
 
-
-  const getStudioStatus = () => {
-    const now = new Date()
-    const day = now.getDay()
-    const hour = now.getHours()
-
-    if (day === 0) return { open: false, label: 'Closed Today' }
-    if (day === 6) {
-      if (hour >= 10 && hour < 17) return { open: true, label: 'Open Now' }
-      return { open: false, label: 'Closed Now' }
-    }
-    if (hour >= 10 && hour < 19) return { open: true, label: 'Open Now' }
-    return { open: false, label: 'Closed Now' }
-  }
-
-  const status = getStudioStatus()
+  const directWhatsappUrl = `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+    'Hello Naurèlle Beauty, I have a question regarding services / home appointments.'
+  )}`
 
   return (
-    <section className="section" id="contact" style={{ padding: '48px 0', scrollMarginTop: '80px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <div className="eyebrow" style={{ justifyContent: 'center' }}>
-          <span>Get in Touch</span>
+    <section id="contact" className="editorial-section" style={{ scrollMarginTop: '80px' }}>
+      <div className="container">
+        {/* Section Header */}
+        <div style={{ maxWidth: '640px', marginBottom: '48px' }}>
+          <span className="editorial-eyebrow">Direct Inquiries</span>
+          <h2 className="section-title">Let’s talk.</h2>
+          <p className="section-subtitle">
+            Have a question, need a home service, or looking for a squeeze-in appointment? Send us a message.
+          </p>
         </div>
-        <h2 className="section-title">Visit the Studio or Reach Out</h2>
-        <p className="section-subtitle" style={{ margin: '0 auto' }}>
-          We’d love to welcome you to our private studio space for appointment consultations, styling questions, or location directions.
-        </p>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', alignItems: 'start' }}>
-        {/* Studio Details Main Card */}
-        <div className="glass-card" style={{ padding: '32px 28px', textAlign: 'left' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Sparkles size={20} style={{ color: 'var(--color-gold)' }} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.5rem' }}>Studio Details</h3>
-              </div>
-            </div>
-
-            <div
+        {/* 2-Column Grid: Form & Direct Contact Channels */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '40px',
+            alignItems: 'start'
+          }}
+        >
+          {/* Contact Form */}
+          <div className="surface-white" style={{ padding: '36px 32px' }}>
+            <h3
               style={{
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                background: status.open ? '#E8F5E9' : '#FFEBEE',
-                color: status.open ? '#2E7D32' : '#C62828',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                border: status.open ? '1px solid #C8E6C9' : '1px solid #FFCDD2'
+                fontFamily: 'var(--font-serif)',
+                fontSize: '1.6rem',
+                color: 'var(--text-primary)',
+                marginBottom: '20px',
+                fontWeight: 400
               }}
             >
-              <span
+              Send Us a Message
+            </h3>
+
+            {success ? (
+              <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(122, 2, 1, 0.08)',
+                    color: 'var(--color-accent)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px'
+                  }}
+                >
+                  <CheckCircle2 size={28} />
+                </div>
+                <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', marginBottom: '8px' }}>
+                  Message Sent
+                </h4>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '20px' }}>
+                  Thank you for reaching out. We will get back to you shortly.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSuccess(false)}
+                  className="btn btn-minimal btn-sm"
+                >
+                  <span>Send Another Message</span>
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" htmlFor="contact-name">Name *</label>
+                  <input
+                    id="contact-name"
+                    className="form-input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your Full Name"
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" htmlFor="contact-email">Email *</label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      className="form-input"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" htmlFor="contact-phone">Phone / WhatsApp</label>
+                    <input
+                      id="contact-phone"
+                      className="form-input"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="e.g. 055 123 4567"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" htmlFor="contact-message">Message *</label>
+                  <textarea
+                    id="contact-message"
+                    className="form-textarea"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Tell us about your enquiry or requested service..."
+                    required
+                  />
+                </div>
+
+                {errorMessage && (
+                  <p style={{ color: 'var(--color-accent)', fontSize: '0.86rem' }}>
+                    {errorMessage}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-burgundy"
+                  disabled={loading}
+                  style={{ width: '100%', marginTop: '8px' }}
+                >
+                  <Send size={15} />
+                  <span>{loading ? 'Sending...' : 'Send Message'}</span>
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* Direct Contact / Chat Column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Direct WhatsApp Card */}
+            <div
+              className="surface-white"
+              style={{
+                padding: '36px 32px',
+                border: '1px solid var(--border-light)'
+              }}
+            >
+              <span className="editorial-eyebrow">Instant Response</span>
+
+              <h3
                 style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: status.open ? '#4CAF50' : '#E57373',
-                  display: 'inline-block'
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: '1.6rem',
+                  color: 'var(--text-primary)',
+                  marginBottom: '12px',
+                  fontWeight: 400
                 }}
-              />
-              <span>{status.label}</span>
-            </div>
-          </div>
+              >
+                Chat directly
+              </h3>
 
-          {/* Contact Touchpoints Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: 'var(--color-nude-light)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--color-baby-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <MapPin size={18} style={{ color: 'var(--color-pink-accent-dark)' }} />
-              </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px' }}>Address</strong>
-                <p style={{ color: 'var(--color-charcoal-muted)', fontSize: '0.88rem', lineHeight: 1.4 }}>12A Abelenkpe Road, East Legon, Accra</p>
-              </div>
-            </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.94rem', lineHeight: 1.65, marginBottom: '24px' }}>
+                For home service enquiries, squeeze-ins, or questions before your appointment, chat directly with Naurèlle Beauty.
+              </p>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: 'var(--color-nude-light)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--color-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Phone size={18} style={{ color: 'var(--color-gold)' }} />
-              </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px' }}>Direct Line</strong>
-                <p style={{ color: 'var(--color-charcoal-muted)', fontSize: '0.88rem' }}>+233 55 123 4567</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: 'var(--color-nude-light)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--color-baby-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Mail size={18} style={{ color: 'var(--color-pink-accent-dark)' }} />
-              </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px' }}>Email Desk</strong>
-                <p style={{ color: 'var(--color-charcoal-muted)', fontSize: '0.88rem' }}>hello@naurellebeauty.com</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Operating Timetable Card */}
-          <div style={{ background: 'var(--color-white)', padding: '20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)', marginBottom: '24px' }}>
-            <h4 style={{ fontSize: '1.05rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Clock size={18} style={{ color: 'var(--color-gold)' }} />
-              <span>Studio Hours Timetable</span>
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px dashed var(--color-border-subtle)' }}>
-                <span style={{ color: 'var(--color-charcoal-muted)' }}>Monday – Friday:</span>
-                <strong>10:00 AM – 7:00 PM</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px dashed var(--color-border-subtle)' }}>
-                <span style={{ color: 'var(--color-charcoal-muted)' }}>Saturday:</span>
-                <strong>10:00 AM – 5:00 PM</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#E57373' }}>
-                <span>Sunday:</span>
-                <strong>Closed</strong>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Channels & Action Links */}
-          <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '20px' }}>
-            <strong style={{ display: 'block', marginBottom: '12px', fontSize: '0.88rem' }}>Connect & Chat Directly:</strong>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <a href="https://wa.me/233551234567" target="_blank" rel="noreferrer" className="btn btn-gold btn-sm">
-                <MessageCircle size={16} />
-                <span>WhatsApp Chat</span>
-              </a>
-              <a href="https://www.instagram.com/naurellebeauty" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                <span>Instagram</span>
-              </a>
-              <a href="https://www.tiktok.com/@naurellebeauty" target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
-                <Video size={16} />
-                <span>TikTok</span>
+              <a
+                href={directWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-burgundy btn-full"
+                style={{ justifyContent: 'center' }}
+              >
+                <MessageCircle size={17} />
+                <span>Chat on WhatsApp</span>
               </a>
             </div>
-          </div>
-        </div>
 
-        {/* Map & Inquiry Form Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Interactive Map */}
-          <div className="glass-card" style={{ padding: '16px', overflow: 'hidden', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px 14px' }}>
-              <h4 style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Navigation size={16} style={{ color: 'var(--color-gold)' }} />
-                <span>Studio Location Map</span>
-              </h4>
-              <span style={{ fontSize: '0.78rem', color: 'var(--color-pink-accent-dark)', fontWeight: 600 }}>East Legon</span>
+            {/* Direct Channels List */}
+            <div
+              className="surface-white"
+              style={{
+                padding: '28px 32px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(122, 2, 1, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  <Phone size={16} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                    Phone Consultation
+                  </strong>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                    {studioConfig.contact.phoneDisplay}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(122, 2, 1, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  <Mail size={16} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                    Email Inquiries
+                  </strong>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                    {studioConfig.contact.email}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(122, 2, 1, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  <InstagramIcon size={16} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                    Instagram
+                  </strong>
+                  <a
+                    href={studioConfig.contact.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.92rem', color: 'var(--color-accent)', textDecoration: 'underline' }}
+                  >
+                    {studioConfig.contact.instagramHandle}
+                  </a>
+                </div>
+              </div>
             </div>
-            <iframe
-              title="Naurélle Beauty location"
-              src="https://www.google.com/maps?q=East%20Legon%20Accra&z=13&output=embed"
-              style={{ width: '100%', height: '230px', border: 0, borderRadius: 'var(--radius-sm)' }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-
-          {/* Instant Inquiry Form */}
-          <div className="glass-card" style={{ padding: '28px 24px', textAlign: 'left' }}>
-            <h3 style={{ fontSize: '1.3rem', marginBottom: '8px' }}>Send Us a Message</h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--color-charcoal-muted)', marginBottom: '16px' }}>
-              Have a question about nail appointments, BIAB refills, or custom nail art? Leave us a note.
-            </p>
-
-            <form onSubmit={handleSendMessage} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input
-                  className="form-input"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Your Name"
-                  required
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input
-                  className="form-input"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Your Email"
-                  required
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <textarea
-                  className="form-textarea"
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Your Message"
-                  required
-                />
-              </div>
-
-              <button type="submit" className="btn btn-pink style-full" style={{ width: '100%' }}>
-                <Send size={16} />
-                <span>Send Message</span>
-              </button>
-            </form>
           </div>
         </div>
       </div>
-
-      {toastMessage && (
-        <Toast message={toastMessage.text} type={toastMessage.type} onClose={() => setToastMessage(null)} />
-      )}
     </section>
   )
 }

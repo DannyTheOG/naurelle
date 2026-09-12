@@ -1,16 +1,13 @@
 import { Navbar } from './components/layout/Navbar'
 import { Footer } from './components/layout/Footer'
 import { HomePage } from './pages/HomePage'
-
 import './App.css'
 
 export function App() {
   return (
-    <div className="app-container">
+    <div className="app-wrapper">
       <Navbar />
-      <main>
-        <HomePage />
-      </main>
+      <HomePage />
       <Footer />
     </div>
   )
