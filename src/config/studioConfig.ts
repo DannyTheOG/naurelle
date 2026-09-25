@@ -26,15 +26,15 @@ export const studioConfig: StudioConfig = {
   },
 
   contact: {
-    whatsappNumber: '233555214888',
-    whatsappDisplay: '+233 55 521 4888',
+    whatsappNumber: '+233555214888',
+    whatsappDisplay: '+233555214888',
     whatsappDefaultMessage: 'Hello Naurèlle Beauty, I would like to enquire about an appointment / home service.',
     whatsappChatUrl: 'https://wa.me/qr/WAGV5TSY4DGOF1',
     phoneNumber: '0555214888',
     phoneDisplay: '0555214888',
     email: 'naurellebeautystudio@gmail.com',
-    instagramHandle: '@naurellebeauty',
-    instagramUrl: 'https://instagram.com/naurellebeauty'
+    instagramHandle: '@naurelle_beautystudios',
+    instagramUrl: 'https://instagram.com/naurelle_beautystudios'
   },
 
   hours: [
