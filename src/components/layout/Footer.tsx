@@ -6,7 +6,8 @@ export function Footer() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const directWhatsappUrl = `https://wa.me/${studioConfig.contact.whatsappNumber}`
+  const directWhatsappUrl =
+    studioConfig.contact.whatsappChatUrl || `https://wa.me/${studioConfig.contact.whatsappNumber}`
 
   return (
     <footer

@@ -50,9 +50,11 @@ export function ContactSection() {
     }, 600)
   }
 
-  const directWhatsappUrl = `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
-    'Hello Naurèlle Beauty, I have a question regarding services / home appointments.'
-  )}`
+  const directWhatsappUrl =
+    studioConfig.contact.whatsappChatUrl ||
+    `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+      'Hello Naurèlle Beauty, I have a question regarding services / home appointments.'
+    )}`
 
   return (
     <section id="contact" className="editorial-section" style={{ scrollMarginTop: '80px' }}>
@@ -260,9 +262,12 @@ export function ContactSection() {
                   <strong style={{ display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
                     Phone Consultation
                   </strong>
-                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                  <a
+                    href={`tel:${studioConfig.contact.phoneNumber}`}
+                    style={{ fontSize: '0.92rem', color: 'var(--text-primary)', textDecoration: 'none' }}
+                  >
                     {studioConfig.contact.phoneDisplay}
-                  </span>
+                  </a>
                 </div>
               </div>
 
@@ -285,9 +290,12 @@ export function ContactSection() {
                   <strong style={{ display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
                     Email Inquiries
                   </strong>
-                  <span style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                  <a
+                    href={`mailto:${studioConfig.contact.email}`}
+                    style={{ fontSize: '0.92rem', color: 'var(--text-primary)', textDecoration: 'none' }}
+                  >
                     {studioConfig.contact.email}
-                  </span>
+                  </a>
                 </div>
               </div>
 

@@ -2,9 +2,11 @@ import { studioConfig } from '../../config/studioConfig'
 import { MessageCircle } from 'lucide-react'
 
 export function SpecialServicesSection() {
-  const whatsappUrl = `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
-    studioConfig.contact.whatsappDefaultMessage
-  )}`
+  const whatsappUrl =
+    studioConfig.contact.whatsappChatUrl ||
+    `https://wa.me/${studioConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+      studioConfig.contact.whatsappDefaultMessage
+    )}`
 
   return (
     <section className="editorial-section-sm" style={{ padding: '64px 0 72px' }}>

@@ -2,6 +2,36 @@ import { studioConfig } from '../../config/studioConfig'
 import { MapPin, Navigation, ExternalLink } from 'lucide-react'
 
 export function LocationSection() {
+  const handleDirectionsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If the browser has already granted geolocation permission, provide high-accuracy live coordinates
+    if ('geolocation' in navigator && 'permissions' in navigator) {
+      navigator.permissions
+        .query({ name: 'geolocation' as PermissionName })
+        .then((permission) => {
+          if (permission.state === 'granted') {
+            e.preventDefault()
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords
+                window.open(
+                  `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=Abia+St,+Accra`,
+                  '_blank',
+                  'noopener,noreferrer'
+                )
+              },
+              () => {
+                window.open(studioConfig.address.directionsUrl, '_blank', 'noopener,noreferrer')
+              },
+              { enableHighAccuracy: true, timeout: 4000 }
+            )
+          }
+        })
+        .catch(() => {
+          // Fall through to native directionsUrl navigation
+        })
+    }
+  }
+
   return (
     <section className="editorial-section-sm" style={{ padding: '48px 0 80px' }}>
       <div className="container">
@@ -10,7 +40,7 @@ export function LocationSection() {
           <span className="editorial-eyebrow">Location &amp; Directions</span>
           <h2 className="section-title">Find the Studio</h2>
           <p className="section-subtitle">
-            Located in {studioConfig.address.area}, {studioConfig.address.city}. Directions and coordinates can be updated directly in the configuration.
+            Located on {studioConfig.address.area}, {studioConfig.address.city}. Studio entry and parking directions are provided upon appointment confirmation.
           </p>
         </div>
 
@@ -84,7 +114,8 @@ export function LocationSection() {
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <a
-                href={studioConfig.address.googleMapsLink}
+                href={studioConfig.address.directionsUrl}
+                onClick={handleDirectionsClick}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-burgundy btn-sm"
@@ -94,7 +125,7 @@ export function LocationSection() {
               </a>
 
               <a
-                href={studioConfig.address.googleMapsLink}
+                href={studioConfig.address.directionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-minimal btn-sm"

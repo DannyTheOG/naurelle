@@ -70,7 +70,7 @@ export function StudioSection() {
               }}
             >
               <span>Sanctuary Atmosphere</span>
-              <span>East Legon Studio</span>
+              <span>{studioConfig.address.city} Studio</span>
             </div>
           </div>
 
@@ -150,17 +150,34 @@ export function StudioSection() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <MapPin size={16} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                <span style={{ color: 'var(--text-muted)' }}>{studioConfig.address.fullDisplay}</span>
+                <a
+                  href={studioConfig.address.googleMapsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none' }}
+                >
+                  {studioConfig.address.fullDisplay}
+                </a>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Phone size={16} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                <span style={{ color: 'var(--text-muted)' }}>{studioConfig.contact.phoneDisplay}</span>
+                <a
+                  href={`tel:${studioConfig.contact.phoneNumber}`}
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none' }}
+                >
+                  {studioConfig.contact.phoneDisplay}
+                </a>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Mail size={16} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                <span style={{ color: 'var(--text-muted)' }}>{studioConfig.contact.email}</span>
+                <a
+                  href={`mailto:${studioConfig.contact.email}`}
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none' }}
+                >
+                  {studioConfig.contact.email}
+                </a>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

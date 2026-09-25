@@ -16,21 +16,23 @@ export const studioConfig: StudioConfig = {
     'Thoughtfully designed nail services for those who appreciate clean details, timeless style, and beautifully finished nails.',
   
   address: {
-    line1: '[Studio Address Line — Editable]',
-    area: 'East Legon',
+    line1: 'Abia St',
+    area: 'Abia St',
     city: 'Accra',
-    fullDisplay: 'East Legon, Accra [Studio Address — Editable in config]',
-    googleMapsLink: 'https://maps.google.com/?q=East+Legon+Accra',
-    embedMapUrl: 'https://www.google.com/maps?q=East%20Legon%20Accra&z=14&output=embed'
+    fullDisplay: 'Abia St, Accra, Ghana',
+    googleMapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Abia+St,+Accra',
+    directionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Abia+St,+Accra',
+    embedMapUrl: 'https://maps.google.com/maps?q=Abia%20St,%20Accra&t=&z=15&ie=UTF8&iwloc=&output=embed'
   },
 
   contact: {
-    // Configurable WhatsApp connection — replace with actual studio number (e.g. 233XXXXXXXXX)
-    whatsappNumber: '233550000000',
-    whatsappDisplay: '+233 55 000 0000 [Editable]',
+    whatsappNumber: '233555214888',
+    whatsappDisplay: '+233 55 521 4888',
     whatsappDefaultMessage: 'Hello Naurèlle Beauty, I would like to enquire about an appointment / home service.',
-    phoneDisplay: '+233 55 000 0000 [Editable]',
-    email: 'hello@naurellebeauty.com [Editable]',
+    whatsappChatUrl: 'https://wa.me/qr/WAGV5TSY4DGOF1',
+    phoneNumber: '0555214888',
+    phoneDisplay: '0555214888',
+    email: 'naurellebeautystudio@gmail.com',
     instagramHandle: '@naurellebeauty',
     instagramUrl: 'https://instagram.com/naurellebeauty'
   },

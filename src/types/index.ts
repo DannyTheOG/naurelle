@@ -55,12 +55,15 @@ export type StudioConfig = {
     city: string
     fullDisplay: string
     googleMapsLink: string
+    directionsUrl: string
     embedMapUrl: string
   }
   contact: {
     whatsappNumber: string
     whatsappDisplay: string
     whatsappDefaultMessage: string
+    whatsappChatUrl: string
+    phoneNumber: string
     phoneDisplay: string
     email: string
     instagramHandle: string
