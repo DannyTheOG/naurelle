@@ -14,7 +14,7 @@ export function SpecialServicesSection() {
         <div
           className="surface-white"
           style={{
-            padding: '48px 36px',
+            padding: 'clamp(32px, 6vw, 48px) clamp(20px, 5vw, 36px)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

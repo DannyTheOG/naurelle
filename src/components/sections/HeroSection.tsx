@@ -18,8 +18,8 @@ export function HeroSection({ onBookClick, onExploreClick }: HeroSectionProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '48px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: '40px',
             alignItems: 'center'
           }}
         >
@@ -30,11 +30,12 @@ export function HeroSection({ onBookClick, onExploreClick }: HeroSectionProps) {
             <h1
               style={{
                 fontFamily: 'var(--font-serif)',
-                fontSize: 'clamp(2.75rem, 5.2vw, 4.5rem)',
-                lineHeight: 1.08,
+                fontSize: 'clamp(2.4rem, 5.2vw, 4.5rem)',
+                lineHeight: 1.1,
                 letterSpacing: '-0.02em',
-                marginBottom: '28px',
-                color: 'var(--text-primary)'
+                marginBottom: '20px',
+                color: 'var(--text-primary)',
+                textWrap: 'balance'
               }}
             >
               Minimal nails.<br />
@@ -43,10 +44,10 @@ export function HeroSection({ onBookClick, onExploreClick }: HeroSectionProps) {
 
             <p
               style={{
-                fontSize: '1.05rem',
-                lineHeight: 1.7,
+                fontSize: '1.02rem',
+                lineHeight: 1.65,
                 color: 'var(--text-muted)',
-                marginBottom: '36px',
+                marginBottom: '32px',
                 maxWidth: '480px'
               }}
             >
@@ -54,7 +55,7 @@ export function HeroSection({ onBookClick, onExploreClick }: HeroSectionProps) {
             </p>
 
             {/* CTAs */}
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="hero-cta-group">
               <a
                 href="#booking"
                 onClick={(e) => scrollTo(e, 'booking', onBookClick)}

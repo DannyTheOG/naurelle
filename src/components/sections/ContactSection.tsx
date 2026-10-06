@@ -72,13 +72,13 @@ export function ContactSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '40px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: '36px',
             alignItems: 'start'
           }}
         >
           {/* Contact Form */}
-          <div className="surface-white" style={{ padding: '36px 32px' }}>
+          <div className="surface-white" style={{ padding: 'clamp(24px, 5vw, 36px) clamp(18px, 4vw, 32px)' }}>
             <h3
               style={{
                 fontFamily: 'var(--font-serif)',
@@ -132,11 +132,12 @@ export function ContactSection() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your Full Name"
+                    autoComplete="name"
                     required
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label" htmlFor="contact-email">Email *</label>
                     <input
@@ -146,6 +147,8 @@ export function ContactSection() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
+                      autoComplete="email"
+                      inputMode="email"
                       required
                     />
                   </div>
@@ -154,10 +157,13 @@ export function ContactSection() {
                     <label className="form-label" htmlFor="contact-phone">Phone / WhatsApp</label>
                     <input
                       id="contact-phone"
+                      type="tel"
                       className="form-input"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="e.g. 055 123 4567"
+                      autoComplete="tel"
+                      inputMode="tel"
                     />
                   </div>
                 </div>

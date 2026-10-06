@@ -12,6 +12,8 @@ export type ServiceItem = {
   category: 'gel-x' | 'builder-gel' | 'acrylic' | 'refill' | 'soak-off' | 'toes'
   basePrice: number
   displayPrice: string
+  durationMinutes: number
+  displayDuration: string
   description: string
   hasLengths: boolean
   lengthOptions?: ServiceLengthOption[]
@@ -22,6 +24,8 @@ export type ToeServiceItem = {
   name: string
   price: number
   displayPrice: string
+  durationMinutes: number
+  displayDuration: string
   description?: string
 }
 
@@ -75,15 +79,30 @@ export type StudioConfig = {
   availableTimes: string[]
 }
 
-export type BookingSelection = {
+export type SelectedBookingService = {
   serviceId: string
   serviceName: string
+  isToeService: boolean
+  price: number
+  durationMinutes: number
+  displayDuration: string
+  lengthId?: string
+  lengthName?: string
+}
+
+export type BookingSelection = {
+  services: SelectedBookingService[]
+  totalDurationMinutes: number
+  totalDurationDisplay: string
+  serviceId?: string
+  serviceName?: string
   lengthId?: string
   lengthName?: string
   toeServiceId?: string
   toeServiceName?: string
   date: string
   time: string
+  endTime?: string
   price: number
   clientName: string
   clientPhone: string

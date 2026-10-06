@@ -102,7 +102,7 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                     width: '100%',
                     marginTop: '8px',
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
                     gap: '12px'
                   }}
                 >
@@ -112,7 +112,8 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                       onClick={() => handleServiceSelect(service.id, length.id)}
                       style={{
                         textAlign: 'left',
-                        padding: '16px',
+                        padding: '14px 16px',
+                        minHeight: '48px',
                         backgroundColor: 'var(--bg-surface)',
                         border: '1px solid var(--border-light)',
                         borderRadius: 'var(--radius-xs)',

@@ -50,6 +50,8 @@ export const studioConfig: StudioConfig = {
       category: 'soak-off',
       basePrice: 50,
       displayPrice: '₵50',
+      durationMinutes: 45,
+      displayDuration: '45 mins',
       description: 'Gentle, non-damaging removal of previous gel or extensions, followed by nourishing cuticle treatment.',
       hasLengths: false
     },
@@ -59,6 +61,8 @@ export const studioConfig: StudioConfig = {
       category: 'gel-x',
       basePrice: 170,
       displayPrice: 'From ₵170',
+      durationMinutes: 180,
+      displayDuration: '3 hrs',
       description: 'Full-cover soft gel tip extensions applied with builder gel for an impeccably sleek, natural look.',
       hasLengths: true,
       lengthOptions: [
@@ -74,6 +78,8 @@ export const studioConfig: StudioConfig = {
       category: 'builder-gel',
       basePrice: 210,
       displayPrice: '₵210',
+      durationMinutes: 180,
+      displayDuration: '3 hrs',
       description: 'Strengthening overlay over natural nails creating a durable, pristine apex and high-gloss nude finish.',
       hasLengths: false
     },
@@ -83,6 +89,8 @@ export const studioConfig: StudioConfig = {
       category: 'acrylic',
       basePrice: 180,
       displayPrice: 'From ₵180',
+      durationMinutes: 180,
+      displayDuration: '3 hrs',
       description: 'Custom sculpted acrylic sets tailored to your preferred silhouette (almond, square, coffin, or squoval).',
       hasLengths: true,
       lengthOptions: [
@@ -98,6 +106,8 @@ export const studioConfig: StudioConfig = {
       category: 'refill',
       basePrice: 150,
       displayPrice: 'From ₵150',
+      durationMinutes: 180,
+      displayDuration: '3 hrs',
       description: 'Precision infill for existing acrylic or gel sets, re-balancing the apex, re-shaping, and refreshing top coat.',
       hasLengths: true,
       lengthOptions: [
@@ -114,6 +124,8 @@ export const studioConfig: StudioConfig = {
       name: 'Acrylic Toes',
       price: 140,
       displayPrice: '₵140',
+      durationMinutes: 60,
+      displayDuration: '1 hr',
       description: 'Clean sculpted acrylic application for toes with balanced natural proportion.'
     },
     {
@@ -121,6 +133,8 @@ export const studioConfig: StudioConfig = {
       name: 'Builder Gel Toes',
       price: 100,
       displayPrice: '₵100',
+      durationMinutes: 60,
+      displayDuration: '1 hr',
       description: 'Strengthening builder overlay protecting natural toenails with durable shine.'
     },
     {
@@ -128,6 +142,8 @@ export const studioConfig: StudioConfig = {
       name: 'Gel Polish Toes',
       price: 50,
       displayPrice: '₵50',
+      durationMinutes: 60,
+      displayDuration: '1 hr',
       description: 'Precision dry pedicure cuticle tidy and flawless chip-resistant gel polish coat.'
     },
     {
@@ -135,6 +151,8 @@ export const studioConfig: StudioConfig = {
       name: 'Stick On Toes',
       price: 80,
       displayPrice: '₵80',
+      durationMinutes: 60,
+      displayDuration: '1 hr',
       description: 'Quick, refined press-on toe set styled with elegant minimalist finish.'
     }
   ],

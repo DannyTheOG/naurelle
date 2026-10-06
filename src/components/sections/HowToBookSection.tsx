@@ -1,23 +1,18 @@
 const bookingSteps = [
   {
     num: '01',
-    title: 'Choose your service',
-    description: 'Select the nail or toe service you want.'
+    title: 'Choose services & length',
+    description: 'Select up to 3 services, choosing your length where applicable before adding more.'
   },
   {
     num: '02',
-    title: 'Choose your length',
-    description: 'Select your preferred length where applicable.'
+    title: 'Choose date & time',
+    description: 'Time slots calculate dynamically based on your combined appointment duration.'
   },
   {
     num: '03',
-    title: 'Choose your date & time',
-    description: 'Select an available appointment.'
-  },
-  {
-    num: '04',
     title: 'Confirm',
-    description: 'Review your details and confirm your appointment.'
+    description: 'Review your details and confirm your studio appointment.'
   }
 ]
 
@@ -30,7 +25,7 @@ export function HowToBookSection() {
           <span className="editorial-eyebrow">Booking Guide</span>
           <h2 className="section-title">How to Book</h2>
           <p className="section-subtitle">
-            An effortless four-step ritual to secure your private studio session.
+            An effortless three-step ritual to secure your private studio session.
           </p>
         </div>
 
@@ -38,10 +33,10 @@ export function HowToBookSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '32px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
+            gap: '28px',
             borderTop: '1px solid var(--border-light)',
-            paddingTop: '36px'
+            paddingTop: '32px'
           }}
         >
           {bookingSteps.map((step) => (

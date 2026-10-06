@@ -35,8 +35,8 @@ export function StudioSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '48px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: '36px',
             alignItems: 'center'
           }}
         >
@@ -98,7 +98,7 @@ export function StudioSection() {
             <div
               className="surface-white"
               style={{
-                padding: '24px 28px',
+                padding: '20px clamp(16px, 4vw, 28px)',
                 border: '1px solid var(--border-light)'
               }}
             >
@@ -143,7 +143,7 @@ export function StudioSection() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
                 gap: '16px',
                 fontSize: '0.88rem'
               }}
@@ -174,7 +174,7 @@ export function StudioSection() {
                 <Mail size={16} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                 <a
                   href={`mailto:${studioConfig.contact.email}`}
-                  style={{ color: 'var(--text-muted)', textDecoration: 'none' }}
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none', wordBreak: 'break-all', overflowWrap: 'anywhere' }}
                 >
                   {studioConfig.contact.email}
                 </a>

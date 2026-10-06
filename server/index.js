@@ -60,11 +60,18 @@ app.post("/api/bookings", async (req, res) => {
         bookings.push(booking);
         await fs.writeFile(bookingsFile, JSON.stringify(bookings, null, 2));
 
+        const servicesSummary = Array.isArray(booking.services) && booking.services.length > 0
+            ? booking.services.map(s => `- ${s.serviceName}${s.lengthName ? ` (${s.lengthName})` : ''} [${s.displayDuration || (s.durationMinutes + ' mins')}] - ₵${s.price}`).join('\n')
+            : (booking.service || 'N/A');
+
+        const durationSummary = booking.totalDurationDisplay || (booking.totalDurationMinutes ? `${booking.totalDurationMinutes} mins` : 'N/A');
+        const timeSummary = booking.endTime ? `${booking.time} – ${booking.endTime}` : booking.time;
+
         const mailOptions = {
             from: process.env.SMTP_FROM || process.env.SMTP_USER,
             to: process.env.SMTP_TO || process.env.SMTP_USER,
             subject: `New booking request from ${booking.name}`,
-            text: `Name: ${booking.name}\nEmail: ${booking.email}\nService: ${booking.service}\nDate: ${booking.date}\nNotes: ${booking.notes}`,
+            text: `Name: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'N/A'}\nServices:\n${servicesSummary}\nTotal Duration: ${durationSummary}\nDate: ${booking.date}\nTime: ${timeSummary}\nPrice: ₵${booking.price || 'N/A'}\nNotes: ${booking.notes || 'None'}`,
         };
 
         if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {

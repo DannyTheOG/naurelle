@@ -51,14 +51,14 @@ export function LocationSection() {
             overflow: 'hidden',
             border: '1px solid var(--border-light)',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
             alignItems: 'stretch'
           }}
         >
           {/* Address & Actions */}
           <div
             style={{
-              padding: '40px 32px',
+              padding: 'clamp(28px, 5vw, 40px) clamp(18px, 4vw, 32px)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -112,7 +112,7 @@ export function LocationSection() {
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="location-btn-group">
               <a
                 href={studioConfig.address.directionsUrl}
                 onClick={handleDirectionsClick}
@@ -137,14 +137,14 @@ export function LocationSection() {
           </div>
 
           {/* Integrated Minimalist Map Embed */}
-          <div style={{ minHeight: '320px', position: 'relative', filter: 'grayscale(0.4) contrast(0.95)' }}>
+          <div style={{ minHeight: '280px', position: 'relative', filter: 'grayscale(0.4) contrast(0.95)' }}>
             <iframe
               title="Naurèlle Beauty Studio Location Map"
               src={studioConfig.address.embedMapUrl}
               style={{
                 width: '100%',
                 height: '100%',
-                minHeight: '320px',
+                minHeight: '280px',
                 border: 0,
                 display: 'block'
               }}

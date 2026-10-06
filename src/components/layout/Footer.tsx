@@ -37,7 +37,7 @@ export function Footer() {
           <nav
             style={{
               display: 'flex',
-              gap: '24px',
+              gap: '16px 24px',
               flexWrap: 'wrap',
               justifyContent: 'center',
               fontSize: '0.82rem',
@@ -45,19 +45,19 @@ export function Footer() {
               textTransform: 'uppercase'
             }}
           >
-            <a href="#hero" onClick={(e) => scrollTo(e, 'hero')} className="navbar-link">
+            <a href="#hero" onClick={(e) => scrollTo(e, 'hero')} className="navbar-link" style={{ padding: '8px 4px', display: 'inline-block' }}>
               Home
             </a>
-            <a href="#services" onClick={(e) => scrollTo(e, 'services')} className="navbar-link">
+            <a href="#services" onClick={(e) => scrollTo(e, 'services')} className="navbar-link" style={{ padding: '8px 4px', display: 'inline-block' }}>
               Services
             </a>
-            <a href="#booking" onClick={(e) => scrollTo(e, 'booking')} className="navbar-link">
+            <a href="#booking" onClick={(e) => scrollTo(e, 'booking')} className="navbar-link" style={{ padding: '8px 4px', display: 'inline-block' }}>
               Appointments
             </a>
-            <a href="#studio" onClick={(e) => scrollTo(e, 'studio')} className="navbar-link">
+            <a href="#studio" onClick={(e) => scrollTo(e, 'studio')} className="navbar-link" style={{ padding: '8px 4px', display: 'inline-block' }}>
               Studio
             </a>
-            <a href="#contact" onClick={(e) => scrollTo(e, 'contact')} className="navbar-link">
+            <a href="#contact" onClick={(e) => scrollTo(e, 'contact')} className="navbar-link" style={{ padding: '8px 4px', display: 'inline-block' }}>
               Contact
             </a>
           </nav>
@@ -66,9 +66,10 @@ export function Footer() {
           <div
             style={{
               display: 'flex',
-              gap: '20px',
+              gap: '12px 20px',
               flexWrap: 'wrap',
               justifyContent: 'center',
+              alignItems: 'center',
               fontSize: '0.82rem',
               color: 'var(--text-muted)'
             }}
@@ -77,25 +78,25 @@ export function Footer() {
               href={studioConfig.contact.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
+              style={{ color: 'var(--color-accent)', padding: '8px 4px', display: 'inline-block' }}
             >
               Instagram
             </a>
-            <span>•</span>
+            <span aria-hidden="true">•</span>
             <a
               href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
+              style={{ color: 'var(--color-accent)', padding: '8px 4px', display: 'inline-block' }}
             >
               WhatsApp
             </a>
-            <span>•</span>
+            <span aria-hidden="true">•</span>
             <a
               href={studioConfig.address.googleMapsLink}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
+              style={{ color: 'var(--color-accent)', padding: '8px 4px', display: 'inline-block' }}
             >
               Location
             </a>
