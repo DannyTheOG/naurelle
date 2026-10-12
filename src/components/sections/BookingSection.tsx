@@ -817,7 +817,7 @@ export function BookingSection({
                           marginBottom: '4px'
                         }}
                       >
-                        Nail Services (3 hrs • Soak Off 45 mins)
+                        Nail & Lash Services
                       </span>
 
                       {studioConfig.services.map((service) => {
@@ -1668,7 +1668,7 @@ export function BookingSection({
                   color: 'var(--text-muted)'
                 }}
               >
-                No advance online card payment required. Payment is handled upon arrival or confirmation as directed by the studio.
+                An upfront deposit of ₵50 is required to secure your appointment. Kindly forward proof of payment via WhatsApp to confirm your booking.
               </div>
             </div>
           </aside>

@@ -76,8 +76,8 @@ export const studioConfig: StudioConfig = {
       id: 'builder-gel',
       name: 'Builder Gel',
       category: 'builder-gel',
-      basePrice: 210,
-      displayPrice: '₵210',
+      basePrice: 170,
+      displayPrice: '₵170',
       durationMinutes: 180,
       displayDuration: '3 hrs',
       description: 'Strengthening overlay over natural nails creating a durable, pristine apex and high-gloss nude finish.',
@@ -115,6 +115,17 @@ export const studioConfig: StudioConfig = {
         { id: 'refill-medium', name: 'Medium', price: 180, displayPrice: '₵180' },
         { id: 'refill-long', name: 'Long', price: 220, displayPrice: '₵220' }
       ]
+    },
+    {
+      id: 'cluster-lash',
+      name: 'Cluster Lash',
+      category: 'lashes',
+      basePrice: 70,
+      displayPrice: '₵70',
+      durationMinutes: 20,
+      displayDuration: '20 mins',
+      description: 'Delicate, lightweight cluster lash application enhancing your natural lash line with effortless definition and volume.',
+      hasLengths: false
     }
   ],
 

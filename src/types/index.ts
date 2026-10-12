@@ -9,7 +9,7 @@ export type ServiceLengthOption = {
 export type ServiceItem = {
   id: string
   name: string
-  category: 'gel-x' | 'builder-gel' | 'acrylic' | 'refill' | 'soak-off' | 'toes'
+  category: 'gel-x' | 'builder-gel' | 'acrylic' | 'refill' | 'soak-off' | 'toes' | 'lashes'
   basePrice: number
   displayPrice: string
   durationMinutes: number
