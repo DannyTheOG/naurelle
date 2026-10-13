@@ -69,7 +69,7 @@ export const studioConfig: StudioConfig = {
         { id: 'gel-x-short', name: 'Short', magnets: 3, price: 170, displayPrice: '₵170' },
         { id: 'gel-x-medium', name: 'Medium', magnets: 6, price: 210, displayPrice: '₵210' },
         { id: 'gel-x-long', name: 'Long', magnets: 9, price: 260, displayPrice: '₵260' },
-        { id: 'gel-x-xl', name: 'Extra Long', magnets: 12, price: 310, displayPrice: '₵310' }
+        { id: 'gel-x-xl', name: 'Extra Long', magnets: 12, price: 320, displayPrice: '₵320' }
       ]
     },
     {
@@ -87,16 +87,16 @@ export const studioConfig: StudioConfig = {
       id: 'acrylic',
       name: 'Acrylic',
       category: 'acrylic',
-      basePrice: 180,
-      displayPrice: 'From ₵180',
+      basePrice: 150,
+      displayPrice: 'From ₵150',
       durationMinutes: 180,
       displayDuration: '3 hrs',
       description: 'Custom sculpted acrylic sets tailored to your preferred silhouette (almond, square, coffin, or squoval).',
       hasLengths: true,
       lengthOptions: [
-        { id: 'acrylic-short', name: 'Short', price: 180, displayPrice: '₵180' },
-        { id: 'acrylic-medium', name: 'Medium', price: 210, displayPrice: '₵210' },
-        { id: 'acrylic-long', name: 'Long', price: 250, displayPrice: '₵250' },
+        { id: 'acrylic-short', name: 'Short', price: 150, displayPrice: '₵150' },
+        { id: 'acrylic-medium', name: 'Medium', price: 220, displayPrice: '₵220' },
+        { id: 'acrylic-long', name: 'Long', price: 310, displayPrice: '₵310' },
         { id: 'acrylic-xl', name: 'Extra Long', price: 350, displayPrice: '₵350' }
       ]
     },
@@ -117,22 +117,26 @@ export const studioConfig: StudioConfig = {
       ]
     },
     {
-      id: 'cluster-lash',
-      name: 'Cluster Lash',
+      id: 'cluster-lashes',
+      name: 'Cluster Lashes',
       category: 'lashes',
       basePrice: 70,
-      displayPrice: '₵70',
+      displayPrice: 'From ₵70',
       durationMinutes: 20,
       displayDuration: '20 mins',
-      description: 'Delicate, lightweight cluster lash application enhancing your natural lash line with effortless definition and volume.',
-      hasLengths: false
+      description: 'Customized cluster lash enhancements designed to accentuate your natural eyes with clean, featherlight volume.',
+      hasLengths: true,
+      lengthOptions: [
+        { id: 'cluster-lashes-top', name: 'Top Lashes', price: 70, displayPrice: '₵70' },
+        { id: 'cluster-lashes-bottom', name: 'Bottom Lashes', price: 120, displayPrice: '₵120' }
+      ]
     }
   ],
 
   toeServices: [
     {
       id: 'toes-acrylic',
-      name: 'Acrylic Toes',
+      name: 'Acrylic Overlay',
       price: 140,
       displayPrice: '₵140',
       durationMinutes: 60,
@@ -141,7 +145,7 @@ export const studioConfig: StudioConfig = {
     },
     {
       id: 'toes-builder-gel',
-      name: 'Builder Gel Toes',
+      name: 'Builder Gel Overlay',
       price: 100,
       displayPrice: '₵100',
       durationMinutes: 60,
@@ -150,7 +154,7 @@ export const studioConfig: StudioConfig = {
     },
     {
       id: 'toes-gel-polish',
-      name: 'Gel Polish Toes',
+      name: 'Gel Polish',
       price: 50,
       displayPrice: '₵50',
       durationMinutes: 60,
@@ -159,7 +163,7 @@ export const studioConfig: StudioConfig = {
     },
     {
       id: 'toes-stick-on',
-      name: 'Stick On Toes',
+      name: 'Stick On',
       price: 80,
       displayPrice: '₵80',
       durationMinutes: 60,

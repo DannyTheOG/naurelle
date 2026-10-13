@@ -95,7 +95,7 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                 )}
               </div>
 
-              {/* Lengths breakdown for services that require length */}
+              {/* Options breakdown for services that require length or options */}
               {service.hasLengths && service.lengthOptions && (
                 <div
                   style={{
@@ -147,7 +147,7 @@ export function ServicesSection({ onSelectService }: ServicesSectionProps) {
                       )}
 
                       <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-accent)', marginTop: '4px' }}>
-                        Select Length &rarr;
+                        {service.category === 'lashes' ? 'Select Option' : 'Select Length'} &rarr;
                       </span>
                     </button>
                   ))}

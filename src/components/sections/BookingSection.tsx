@@ -62,6 +62,33 @@ export function BookingSection({
         })
       }
     } else {
+      // Check if preselectedServiceId matches a lengthOption id (e.g. cluster-lashes-top or gel-x-short)
+      for (const s of studioConfig.services) {
+        if (s.hasLengths && s.lengthOptions) {
+          const foundOpt = s.lengthOptions.find((opt) => opt.id === preselectedServiceId)
+          if (foundOpt) {
+            setSelectedServices((prev) => {
+              if (prev.some((item) => item.serviceId === s.id)) return prev
+              if (prev.length >= 3) return prev
+              return [
+                ...prev,
+                {
+                  serviceId: s.id,
+                  serviceName: s.name,
+                  isToeService: false,
+                  price: foundOpt.price,
+                  durationMinutes: s.durationMinutes,
+                  displayDuration: s.displayDuration,
+                  lengthId: foundOpt.id,
+                  lengthName: foundOpt.name
+                }
+              ]
+            })
+            return
+          }
+        }
+      }
+
       const found = studioConfig.services.find((s) => s.id === preselectedServiceId)
       if (found) {
         if (found.hasLengths && found.lengthOptions && found.lengthOptions.length > 0) {
@@ -85,7 +112,7 @@ export function BookingSection({
               ]
             })
           } else {
-            // Service has lengths but none preselected: open length selector immediately
+            // Service has lengths/options but none preselected: open selector immediately
             setPendingLengthServiceId(found.id)
           }
         } else {
@@ -130,23 +157,23 @@ export function BookingSection({
     return studioConfig.services.find((s) => s.id === pendingLengthServiceId) || null
   }, [pendingLengthServiceId])
 
-  // User clicked a Main Nail Service card
+  // User clicked a Main Service card
   const handleSelectMainService = (service: ServiceItem) => {
     setErrorMessage('')
 
-    // If another service is awaiting length selection, block until length is chosen
+    // If another service is awaiting selection, block until choice is made
     if (pendingLengthServiceId && pendingLengthServiceId !== service.id) {
       setErrorMessage(
-        `Please select a length for ${pendingService?.name || 'the current service'} before selecting another service.`
+        `Please select an option for ${pendingService?.name || 'the current service'} before selecting another service.`
       )
       return
     }
 
     const existingIndex = selectedServices.findIndex((s) => s.serviceId === service.id)
 
-    // If service has lengths
+    // If service has lengths / varied options (Gel-X, Acrylic, Refill, Cluster Lashes)
     if (service.hasLengths) {
-      // If it's already selected and clicked again, open length selector to change length or allow removing
+      // If it's already selected and clicked again, open selector to change option or allow removing
       if (existingIndex >= 0) {
         setPendingLengthServiceId(service.id)
         return
@@ -158,7 +185,7 @@ export function BookingSection({
         return
       }
 
-      // Open length selection immediately for this service before another can be picked
+      // Open dropdown options immediately for this service before another can be picked
       setPendingLengthServiceId(service.id)
       return
     }
@@ -826,6 +853,9 @@ export function BookingSection({
                         const isPending = pendingLengthServiceId === service.id
                         const isMaxReached = selectedServices.length >= 3 && !isConfirmed && !isPending
                         const isBlockedByPending = Boolean(pendingLengthServiceId && pendingLengthServiceId !== service.id)
+                        const isLashService = service.category === 'lashes'
+                        const optionTerm = isLashService ? 'option' : 'length'
+                        const optionTermTitle = isLashService ? 'Option' : 'Length'
 
                         return (
                           <div
@@ -864,30 +894,32 @@ export function BookingSection({
                                         borderRadius: '10px'
                                       }}
                                     >
-                                      Length: {confirmedItem.lengthName}
+                                      {isLashService ? '' : 'Length: '}{confirmedItem.lengthName}
                                     </span>
                                   )}
 
-                                  <span
-                                    style={{
-                                      fontSize: '0.74rem',
-                                      fontWeight: 600,
-                                      color: 'var(--color-accent)',
-                                      backgroundColor: 'rgba(122,2,1,0.06)',
-                                      padding: '2px 8px',
-                                      borderRadius: '12px',
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '4px'
-                                    }}
-                                  >
-                                    <Clock size={11} />
-                                    {service.displayDuration}
-                                  </span>
+                                  {!isLashService && (
+                                    <span
+                                      style={{
+                                        fontSize: '0.74rem',
+                                        fontWeight: 600,
+                                        color: 'var(--color-accent)',
+                                        backgroundColor: 'rgba(122,2,1,0.06)',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                    >
+                                      <Clock size={11} />
+                                      {service.displayDuration}
+                                    </span>
+                                  )}
 
                                   {service.hasLengths && (
                                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                      (Length required)
+                                      ({optionTermTitle} required)
                                     </span>
                                   )}
                                 </div>
@@ -927,7 +959,7 @@ export function BookingSection({
                               </div>
                             </div>
 
-                            {/* Inline Length Selection Dropdown if this card is currently pending */}
+                            {/* Inline Length/Option Selection Dropdown if this card is currently pending */}
                             {isPending && (
                               <div
                                 style={{
@@ -939,7 +971,7 @@ export function BookingSection({
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                   <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                                    Select length for {service.name} before selecting another service:
+                                    Select {optionTerm} for {service.name} before selecting another service:
                                   </span>
                                   <button
                                     type="button"
@@ -1013,7 +1045,7 @@ export function BookingSection({
                                   className="btn btn-minimal btn-sm"
                                   style={{ padding: '3px 10px', fontSize: '0.76rem' }}
                                 >
-                                  Change Length ({confirmedItem?.lengthName})
+                                  Change {optionTermTitle} ({confirmedItem?.lengthName})
                                 </button>
                                 <button
                                   type="button"

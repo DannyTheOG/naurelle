@@ -6,6 +6,16 @@ export type ServiceLengthOption = {
   displayPrice: string
 }
 
+export type SubServiceOption = {
+  id: string
+  name: string
+  price: number
+  displayPrice: string
+  durationMinutes: number
+  displayDuration: string
+  description?: string
+}
+
 export type ServiceItem = {
   id: string
   name: string
@@ -17,6 +27,8 @@ export type ServiceItem = {
   description: string
   hasLengths: boolean
   lengthOptions?: ServiceLengthOption[]
+  hasSubServices?: boolean
+  subServices?: SubServiceOption[]
 }
 
 export type ToeServiceItem = {
