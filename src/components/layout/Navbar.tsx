@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Menu, X, ArrowUpRight } from 'lucide-react'
+import { Menu, X, ArrowUpRight, User } from 'lucide-react'
+import { useAuth } from '../../context/useAuth'
+import { AuthModal } from '../auth/AuthModal'
+import { UserProfileModal } from '../auth/UserProfileModal'
 
 type NavbarProps = {
   onOpenBooking?: () => void
 }
 
 export function Navbar({ onOpenBooking }: NavbarProps) {
+  const { user, profile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('hero')
+
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
 
   // Track active section on scroll
   useEffect(() => {
@@ -82,6 +89,10 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
     }, 50)
   }
 
+  const displayName = profile?.fullName
+    ? profile.fullName.split(' ')[0]
+    : user?.email?.split('@')[0] || 'Account'
+
   return (
     <>
       <header className="navbar-wrapper" style={{ boxShadow: scrolled ? '0 4px 20px rgba(0, 0, 0, 0.04)' : 'none' }}>
@@ -135,6 +146,60 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 Contact
               </a>
 
+              {/* User Account Button */}
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setProfileModalOpen(true)}
+                  className="navbar-link"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(58, 20, 30, 0.05)',
+                    padding: '8px 14px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(58, 20, 30, 0.1)',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: '#3A141E',
+                  }}
+                >
+                  <User size={15} />
+                  <span>{displayName}</span>
+                  {profile?.role && profile.role !== 'client' && (
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        textTransform: 'uppercase',
+                        background: '#3A141E',
+                        color: '#FFF',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      {profile.role}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="navbar-link"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                  }}
+                >
+                  Sign In
+                </button>
+              )}
+
               <a
                 href="#booking"
                 onClick={(e) => scrollToSection(e, 'booking')}
@@ -186,6 +251,65 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 >
                   <X size={22} />
                 </button>
+              </div>
+
+              {/* Mobile User Profile Header */}
+              <div
+                style={{
+                  padding: '12px 16px',
+                  background: '#F9F6F3',
+                  borderRadius: '10px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      setProfileModalOpen(true)
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#3A141E',
+                    }}
+                  >
+                    <User size={18} />
+                    <span>My Account ({displayName})</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      setAuthModalOpen(true)
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      color: '#3A141E',
+                    }}
+                  >
+                    <User size={18} />
+                    <span>Sign In / Create Account</span>
+                  </button>
+                )}
               </div>
 
               <nav className="mobile-nav-links" aria-label="Mobile Navigation Links">
@@ -248,6 +372,12 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
           </div>,
           document.body
         )}
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+
+      {/* Profile Modal */}
+      <UserProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </>
   )
 }

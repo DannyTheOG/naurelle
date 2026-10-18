@@ -103,6 +103,7 @@ export type SelectedBookingService = {
 }
 
 export type BookingSelection = {
+  clientId?: string
   services: SelectedBookingService[]
   totalDurationMinutes: number
   totalDurationDisplay: string
@@ -121,3 +122,26 @@ export type BookingSelection = {
   clientEmail: string
   notes: string
 }
+
+export type UserRole = 'client' | 'staff' | 'admin'
+
+export type BeautyPreferences = {
+  preferredLength?: string
+  allergies?: string
+  nailNotes?: string
+}
+
+export type UserProfile = {
+  id: string
+  email: string
+  fullName: string
+  phone: string
+  avatarUrl?: string
+  role: UserRole
+  beautyNotes?: BeautyPreferences
+  internalNotes?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+

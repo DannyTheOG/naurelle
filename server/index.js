@@ -1,90 +1,57 @@
 import express from "express";
 import cors from "cors";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import usersRouter from "./routes/users.js";
+import adminUsersRouter from "./routes/adminUsers.js";
+import bookingsRouter from "./routes/bookings.js";
+import { isSupabaseConfigured } from "./supabaseClient.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, "..", "dist");
 
 const app = express();
-const port = 4000;
-const bookingsFile = path.join(__dirname, "bookings.json");
-
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
 
+// System health check
 app.get("/health", (_req, res) => {
-    res.json({ status: "ok" });
+    res.json({
+        status: "ok",
+        supabaseConfigured: isSupabaseConfigured(),
+        timestamp: new Date().toISOString(),
+    });
 });
 
-app.get("/api/bookings", async (_req, res) => {
-    try {
-        const data = await fs.readFile(bookingsFile, "utf8");
-        res.json(JSON.parse(data));
-    } catch {
-        res.json([]);
-    }
-});
+// User Management & Booking Endpoints
+app.use("/api/users", usersRouter);
+app.use("/api/admin/users", adminUsersRouter);
+app.use("/api/bookings", bookingsRouter);
 
-app.post("/api/bookings", async (req, res) => {
-    try {
-        const booking = {
-            id: Date.now(),
-            ...req.body,
-            createdAt: new Date().toISOString(),
-        };
+// Serve static frontend build if dist exists (production mode)
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get(/^(?!\/api|\/health).*/, (_req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+    });
+}
 
-        let bookings = [];
-        try {
-            const data = await fs.readFile(bookingsFile, "utf8");
-            bookings = JSON.parse(data);
-        } catch {
-            bookings = [];
-        }
-
-        bookings.push(booking);
-        await fs.writeFile(bookingsFile, JSON.stringify(bookings, null, 2));
-
-        const servicesSummary = Array.isArray(booking.services) && booking.services.length > 0
-            ? booking.services.map(s => `- ${s.serviceName}${s.lengthName ? ` (${s.lengthName})` : ''} [${s.displayDuration || (s.durationMinutes + ' mins')}] - ₵${s.price}`).join('\n')
-            : (booking.service || 'N/A');
-
-        const durationSummary = booking.totalDurationDisplay || (booking.totalDurationMinutes ? `${booking.totalDurationMinutes} mins` : 'N/A');
-        const timeSummary = booking.endTime ? `${booking.time} – ${booking.endTime}` : booking.time;
-
-        const mailOptions = {
-            from: process.env.SMTP_FROM || process.env.SMTP_USER,
-            to: process.env.SMTP_TO || process.env.SMTP_USER,
-            subject: `New booking request from ${booking.name}`,
-            text: `Name: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'N/A'}\nServices:\n${servicesSummary}\nTotal Duration: ${durationSummary}\nDate: ${booking.date}\nTime: ${timeSummary}\nPrice: ₵${booking.price || 'N/A'}\nNotes: ${booking.notes || 'None'}`,
-        };
-
-        if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-            await transporter.sendMail(mailOptions);
-        }
-
-        res.status(201).json({ success: true, booking });
-    } catch (error) {
-        console.error("Booking error:", error);
-        res.status(500).json({ success: false, message: "Unable to save booking." });
-    }
+// Global Error Handler
+app.use((err, _req, res, _next) => {
+    console.error("Unhandled error:", err);
+    res.status(500).json({ success: false, error: "Internal server error" });
 });
 
 app.listen(port, () => {
-    console.log(`Booking API listening on http://localhost:${port}`);
+    console.log(`✨ Naurèlle Beauty API listening on http://localhost:${port}`);
+    console.log(`🔐 Supabase Connected: ${isSupabaseConfigured() ? "YES" : "NO (using fallback mode)"}`);
 });
+
+export default app;

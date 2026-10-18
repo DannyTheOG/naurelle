@@ -3,6 +3,8 @@ import { studioConfig } from '../../config/studioConfig'
 import type { ServiceItem, ServiceLengthOption, ToeServiceItem, SelectedBookingService } from '../../types'
 import { Check, ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2, Sparkles, X, AlertCircle, ChevronDown } from 'lucide-react'
 import { formatDuration, generateAvailableTimeSlots, getOperatingHoursForDate } from '../../utils/bookingUtils'
+import { useAuth } from '../../context/useAuth'
+import { API_BASE_URL } from '../../config/api'
 
 type BookingSectionProps = {
   preselectedServiceId?: string
@@ -13,6 +15,8 @@ export function BookingSection({
   preselectedServiceId,
   preselectedLengthId
 }: BookingSectionProps) {
+  const { user, profile, token } = useAuth()
+
   // Current active step (1: Services & Length, 2: Date & Dynamic Time, 3: Confirm)
   const [currentStep, setCurrentStep] = useState<number>(1)
 
@@ -32,6 +36,17 @@ export function BookingSection({
   const [clientPhone, setClientPhone] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [notes, setNotes] = useState('')
+
+  // Autofill client contact details if signed in
+  useEffect(() => {
+    if (profile) {
+      setClientName((prev) => prev || profile.fullName || '')
+      setClientPhone((prev) => prev || profile.phone || '')
+      setClientEmail((prev) => prev || profile.email || '')
+    } else if (user?.email) {
+      setClientEmail((prev) => prev || user.email || '')
+    }
+  }, [profile, user])
 
   // Submission & Feedback states
   const [submitting, setSubmitting] = useState(false)
@@ -371,6 +386,7 @@ export function BookingSection({
     setErrorMessage('')
 
     const bookingPayload = {
+      clientId: user?.id || null,
       services: selectedServices,
       totalDurationMinutes,
       totalDurationDisplay,
@@ -388,9 +404,14 @@ export function BookingSection({
     }
 
     try {
-      await fetch('http://localhost:4000/api/bookings', {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      await fetch(`${API_BASE_URL}/api/bookings`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(bookingPayload)
       })
     } catch {
