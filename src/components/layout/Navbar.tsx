@@ -151,7 +151,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 <button
                   type="button"
                   onClick={() => setProfileModalOpen(true)}
-                  className="navbar-link"
+                  className="navbar-link navbar-user-btn"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -164,10 +164,11 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                     fontSize: '0.85rem',
                     fontWeight: 600,
                     color: '#3A141E',
+                    maxWidth: '180px',
                   }}
                 >
-                  <User size={15} />
-                  <span>{displayName}</span>
+                  <User size={15} style={{ flexShrink: 0 }} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
                   {profile?.role && profile.role !== 'client' && (
                     <span
                       style={{
@@ -177,6 +178,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                         color: '#FFF',
                         padding: '1px 5px',
                         borderRadius: '4px',
+                        flexShrink: 0,
                       }}
                     >
                       {profile.role}
@@ -284,8 +286,10 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                       color: '#3A141E',
                     }}
                   >
-                    <User size={18} />
-                    <span>My Account ({displayName})</span>
+                    <User size={18} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      My Account ({displayName})
+                    </span>
                   </button>
                 ) : (
                   <button

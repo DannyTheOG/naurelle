@@ -75,58 +75,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
 
   return (
     <div
-      className="mobile-nav-overlay"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        zIndex: 9999,
-      }}
+      className="auth-modal-overlay"
       onClick={onClose}
+      role="presentation"
     >
       <div
         className="auth-modal-card"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '440px',
-          padding: '36px 32px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          position: 'relative',
-          animation: 'fadeIn 0.25s ease-out',
-        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="User Authentication"
       >
-        {/* Close Button */}
+        {/* Close Button with touch target */}
         <button
           onClick={onClose}
+          className="modal-close-btn"
           aria-label="Close dialog"
           style={{
             position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#666',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
+            top: '16px',
+            right: '16px',
           }}
         >
           <X size={20} />
         </button>
 
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px', paddingRight: '24px', paddingLeft: '24px' }}>
           <p
             style={{
               fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: '1.4rem',
+              fontSize: 'clamp(1.15rem, 4vw, 1.35rem)',
               letterSpacing: '0.08em',
               fontWeight: 600,
               color: '#3A141E',
@@ -135,19 +114,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           >
             NAURÈLLE BEAUTY
           </p>
-          <p style={{ fontSize: '0.88rem', color: '#6B6865', margin: 0 }}>
+          <p style={{ fontSize: '0.84rem', color: '#6B6865', margin: 0, lineHeight: 1.4 }}>
             {mode === 'signin' ? 'Sign in to access your appointments & preferences' : 'Create an account for expedited booking'}
           </p>
         </div>
 
-        {/* Tab Toggle */}
+        {/* Mode Tab Toggle */}
         <div
           style={{
             display: 'flex',
             background: '#F5F2EE',
             borderRadius: '10px',
-            padding: '4px',
-            marginBottom: '24px',
+            padding: '3px',
+            marginBottom: '20px',
           }}
         >
           <button
@@ -159,16 +138,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             }}
             style={{
               flex: 1,
-              padding: '8px 16px',
+              padding: '8px 12px',
               border: 'none',
               borderRadius: '8px',
               background: mode === 'signin' ? '#FFFFFF' : 'transparent',
               color: mode === 'signin' ? '#3A141E' : '#777',
               fontWeight: mode === 'signin' ? 600 : 500,
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               cursor: 'pointer',
               boxShadow: mode === 'signin' ? '0 2px 4px rgba(0,0,0,0.06)' : 'none',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.15s ease',
+              minHeight: '38px',
             }}
           >
             Sign In
@@ -182,16 +162,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             }}
             style={{
               flex: 1,
-              padding: '8px 16px',
+              padding: '8px 12px',
               border: 'none',
               borderRadius: '8px',
               background: mode === 'signup' ? '#FFFFFF' : 'transparent',
               color: mode === 'signup' ? '#3A141E' : '#777',
               fontWeight: mode === 'signup' ? 600 : 500,
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               cursor: 'pointer',
               boxShadow: mode === 'signup' ? '0 2px 4px rgba(0,0,0,0.06)' : 'none',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.15s ease',
+              minHeight: '38px',
             }}
           >
             Create Account
@@ -205,16 +186,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               background: '#FFF5F5',
               border: '1px solid #FED7D7',
               borderRadius: '8px',
-              padding: '12px 14px',
-              marginBottom: '18px',
+              padding: '10px 12px',
+              marginBottom: '16px',
               display: 'flex',
               alignItems: 'flex-start',
-              gap: '10px',
-              fontSize: '0.85rem',
+              gap: '8px',
+              fontSize: '0.84rem',
               color: '#C53030',
+              lineHeight: 1.4,
             }}
           >
-            <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -225,16 +207,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               background: '#F0FFF4',
               border: '1px solid #C6F6D5',
               borderRadius: '8px',
-              padding: '12px 14px',
-              marginBottom: '18px',
+              padding: '10px 12px',
+              marginBottom: '16px',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              fontSize: '0.85rem',
+              gap: '8px',
+              fontSize: '0.84rem',
               color: '#2F855A',
+              lineHeight: 1.4,
             }}
           >
-            <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
+            <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
             <span>{successMsg}</span>
           </div>
         )}
@@ -244,7 +227,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           {mode === 'signup' && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
                   Full Name
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -260,16 +243,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                       padding: '10px 14px 10px 38px',
                       borderRadius: '8px',
                       border: '1px solid #E2DCD5',
-                      fontSize: '0.9rem',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      minHeight: '42px',
                     }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
                   Phone Number
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -284,9 +267,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                       padding: '10px 14px 10px 38px',
                       borderRadius: '8px',
                       border: '1px solid #E2DCD5',
-                      fontSize: '0.9rem',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      minHeight: '42px',
                     }}
                   />
                 </div>
@@ -295,7 +278,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
               Email Address
             </label>
             <div style={{ position: 'relative' }}>
@@ -311,16 +294,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   padding: '10px 14px 10px 38px',
                   borderRadius: '8px',
                   border: '1px solid #E2DCD5',
-                  fontSize: '0.9rem',
                   outline: 'none',
                   boxSizing: 'border-box',
+                  minHeight: '42px',
                 }}
               />
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
               Password
             </label>
             <div style={{ position: 'relative' }}>
@@ -337,9 +320,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   padding: '10px 14px 10px 38px',
                   borderRadius: '8px',
                   border: '1px solid #E2DCD5',
-                  fontSize: '0.9rem',
                   outline: 'none',
                   boxSizing: 'border-box',
+                  minHeight: '42px',
                 }}
               />
             </div>
@@ -350,14 +333,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             disabled={loading}
             className="btn btn-burgundy"
             style={{
-              marginTop: '10px',
+              marginTop: '8px',
               padding: '12px',
               width: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              fontSize: '0.95rem',
+              fontSize: '0.92rem',
+              minHeight: '44px',
             }}
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : null}
@@ -365,7 +349,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.78rem', color: '#8A8580' }}>
+        <p style={{ textAlign: 'center', marginTop: '18px', fontSize: '0.78rem', color: '#8A8580', lineHeight: 1.4 }}>
           By continuing, you agree to Naurèlle Beauty appointment terms & salon policies.
         </p>
       </div>

@@ -72,50 +72,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
   return (
     <div
-      className="mobile-nav-overlay"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        zIndex: 9999,
-      }}
+      className="auth-modal-overlay"
       onClick={onClose}
+      role="presentation"
     >
       <div
-        className="auth-modal-card"
+        className="profile-modal-card"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '560px',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          position: 'relative',
-          overflow: 'hidden',
-          animation: 'fadeIn 0.25s ease-out',
-        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="User Account and Appointments"
       >
         {/* Modal Header */}
-        <div
-          style={{
-            padding: '24px 28px',
-            borderBottom: '1px solid #EFEAE5',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: '#FAF7F4',
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="modal-header-responsive">
+          <div style={{ minWidth: 0, paddingRight: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h2
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: '1.25rem',
+                  fontSize: 'clamp(1.1rem, 3.5vw, 1.25rem)',
                   margin: 0,
                   color: '#3A141E',
                 }}
@@ -124,12 +99,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               </h2>
               <span
                 style={{
-                  fontSize: '0.72rem',
+                  fontSize: '0.7rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
                   background: profile.role === 'admin' ? '#3A141E' : '#E8DFD8',
                   color: profile.role === 'admin' ? '#FFFFFF' : '#3A141E',
-                  padding: '3px 8px',
+                  padding: '2px 8px',
                   borderRadius: '12px',
                   fontWeight: 600,
                 }}
@@ -137,72 +112,54 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 {profile.role}
               </span>
             </div>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#777' }}>
+            <p
+              style={{
+                margin: '3px 0 0 0',
+                fontSize: '0.82rem',
+                color: '#777',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '280px',
+              }}
+            >
               {profile.email}
             </p>
           </div>
 
           <button
             onClick={onClose}
+            className="modal-close-btn"
             aria-label="Close dialog"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#666',
-              padding: '6px',
-              borderRadius: '50%',
-            }}
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div
-          style={{
-            display: 'flex',
-            padding: '12px 28px 0',
-            borderBottom: '1px solid #EFEAE5',
-            gap: '20px',
-          }}
-        >
+        <div className="modal-tabs-responsive">
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
+            className="modal-tab-btn"
             style={{
-              padding: '10px 4px',
-              background: 'transparent',
-              border: 'none',
               borderBottom: activeTab === 'profile' ? '2px solid #3A141E' : '2px solid transparent',
               color: activeTab === 'profile' ? '#3A141E' : '#777',
               fontWeight: activeTab === 'profile' ? 600 : 500,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
             }}
           >
             <User size={16} />
-            <span>Profile & Preferences</span>
+            <span>Profile &amp; Preferences</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('bookings')}
+            className="modal-tab-btn"
             style={{
-              padding: '10px 4px',
-              background: 'transparent',
-              border: 'none',
               borderBottom: activeTab === 'bookings' ? '2px solid #3A141E' : '2px solid transparent',
               color: activeTab === 'bookings' ? '#3A141E' : '#777',
               fontWeight: activeTab === 'bookings' ? 600 : 500,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
             }}
           >
             <Calendar size={16} />
@@ -211,7 +168,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
+        <div className="modal-body-responsive">
           {activeTab === 'profile' ? (
             <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {saveSuccess && (
@@ -224,7 +181,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    fontSize: '0.85rem',
+                    fontSize: '0.84rem',
                     color: '#2F855A',
                   }}
                 >
@@ -243,7 +200,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    fontSize: '0.85rem',
+                    fontSize: '0.84rem',
                     color: '#C53030',
                   }}
                 >
@@ -252,9 +209,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              {/* Responsive 2-column or 1-column grid */}
+              <div className="profile-form-grid">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
                     Full Name
                   </label>
                   <input
@@ -266,15 +224,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                       padding: '9px 12px',
                       borderRadius: '8px',
                       border: '1px solid #E2DCD5',
-                      fontSize: '0.9rem',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      minHeight: '40px',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
                     Phone Number
                   </label>
                   <input
@@ -286,9 +244,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                       padding: '9px 12px',
                       borderRadius: '8px',
                       border: '1px solid #E2DCD5',
-                      fontSize: '0.9rem',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      minHeight: '40px',
                     }}
                   />
                 </div>
@@ -297,7 +255,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               {/* Beauty Preferences Section */}
               <div
                 style={{
-                  marginTop: '12px',
+                  marginTop: '8px',
                   padding: '16px',
                   background: '#FBF9F7',
                   borderRadius: '12px',
@@ -307,7 +265,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                   <Sparkles size={16} style={{ color: '#A06E4D' }} />
                   <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#3A141E' }}>
-                    Beauty & Salon Preferences
+                    Beauty &amp; Salon Preferences
                   </span>
                 </div>
 
@@ -326,16 +284,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         padding: '8px 12px',
                         borderRadius: '6px',
                         border: '1px solid #E2DCD5',
-                        fontSize: '0.88rem',
                         outline: 'none',
                         boxSizing: 'border-box',
+                        minHeight: '38px',
                       }}
                     />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: '#666', marginBottom: '4px' }}>
-                      Allergies & Sensitivities
+                      Allergies &amp; Sensitivities
                     </label>
                     <input
                       type="text"
@@ -347,9 +305,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         padding: '8px 12px',
                         borderRadius: '6px',
                         border: '1px solid #E2DCD5',
-                        fontSize: '0.88rem',
                         outline: 'none',
                         boxSizing: 'border-box',
+                        minHeight: '38px',
                       }}
                     />
                   </div>
@@ -368,7 +326,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         padding: '8px 12px',
                         borderRadius: '6px',
                         border: '1px solid #E2DCD5',
-                        fontSize: '0.88rem',
                         outline: 'none',
                         resize: 'vertical',
                         boxSizing: 'border-box',
@@ -378,12 +335,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
                 <button
                   type="submit"
                   disabled={isSaving}
                   className="btn btn-burgundy btn-sm"
-                  style={{ padding: '9px 24px' }}
+                  style={{ padding: '9px 24px', minHeight: '38px' }}
                 >
                   {isSaving ? 'Saving...' : 'Save Preferences'}
                 </button>
@@ -396,15 +353,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                   Loading appointments...
                 </div>
               ) : bookings.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '36px 20px', color: '#777' }}>
+                <div style={{ textAlign: 'center', padding: '36px 16px', color: '#777' }}>
                   <Calendar size={36} style={{ color: '#D4C9BF', marginBottom: '12px' }} />
-                  <p style={{ margin: 0, fontWeight: 500 }}>No appointments found yet.</p>
-                  <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: '#999' }}>
+                  <p style={{ margin: 0, fontWeight: 500, fontSize: '0.92rem' }}>No appointments found yet.</p>
+                  <p style={{ margin: '6px 0 0', fontSize: '0.82rem', color: '#999' }}>
                     Appointments you book while signed in will appear here.
                   </p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {bookings.map((b: any, idx: number) => {
                     const servicesList = Array.isArray(b.services)
                       ? b.services.map((s: any) => s.serviceName || s.name).join(', ')
@@ -413,37 +370,34 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     return (
                       <div
                         key={b.id || idx}
-                        style={{
-                          padding: '16px',
-                          borderRadius: '10px',
-                          border: '1px solid #EAE5DF',
-                          background: '#FAF8F6',
-                        }}
+                        className="profile-appointment-card"
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.92rem', color: '#3A141E' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#3A141E', lineHeight: 1.3 }}>
                             {servicesList}
                           </span>
                           <span
                             style={{
-                              fontSize: '0.72rem',
+                              fontSize: '0.7rem',
                               textTransform: 'uppercase',
                               padding: '2px 8px',
                               borderRadius: '10px',
                               background: '#E8F5E9',
                               color: '#2E7D32',
                               fontWeight: 600,
+                              flexShrink: 0,
                             }}
                           >
                             {b.status || 'Scheduled'}
                           </span>
                         </div>
-                        <div style={{ display: 'flex', gap: '16px', fontSize: '0.82rem', color: '#666' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Calendar size={14} /> {b.date}
+
+                        <div className="profile-appointment-meta">
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Calendar size={13} /> {b.date}
                           </span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={14} /> {b.time}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={13} /> {b.time}
                           </span>
                           {b.price && (
                             <span style={{ fontWeight: 600, color: '#3A141E', marginLeft: 'auto' }}>
@@ -461,16 +415,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Modal Footer with Sign Out */}
-        <div
-          style={{
-            padding: '16px 28px',
-            borderTop: '1px solid #EFEAE5',
-            background: '#FAF7F4',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+        <div className="modal-footer-responsive">
           <button
             type="button"
             onClick={() => {
@@ -487,6 +432,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               gap: '6px',
               fontSize: '0.85rem',
               fontWeight: 500,
+              padding: '6px 4px',
+              minHeight: '36px',
             }}
           >
             <LogOut size={16} />
@@ -497,7 +444,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
             type="button"
             onClick={onClose}
             className="btn btn-secondary btn-sm"
-            style={{ padding: '8px 18px' }}
+            style={{ padding: '8px 18px', minHeight: '36px' }}
           >
             Close
           </button>

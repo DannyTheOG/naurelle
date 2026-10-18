@@ -871,3 +871,295 @@
     display: flex;
   }
 }
+
+/* ==============================================================================
+   RESPONSIVE USER MANAGEMENT & AUTH MODAL STYLES
+   Optimized for all screen sizes (mobile 320px+, tablet, desktop, landscape)
+   ============================================================================== */
+
+/* Modal Backdrop Overlay */
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 12, 16, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 480px) {
+  .auth-modal-overlay {
+    padding: 10px;
+    align-items: flex-end; /* Mobile bottom sheet style on very small devices or centered */
+  }
+}
+
+@media (max-height: 600px) {
+  .auth-modal-overlay {
+    align-items: center;
+    padding: 8px;
+  }
+}
+
+/* Auth Modal Card (Sign In / Sign Up) */
+.auth-modal-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100dvh - 32px);
+  padding: 32px 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 480px) {
+  .auth-modal-card {
+    padding: 24px 18px 20px;
+    border-radius: 18px 18px 12px 12px;
+    max-height: calc(100dvh - 20px);
+  }
+}
+
+@media (max-height: 650px) {
+  .auth-modal-card {
+    padding: 20px 18px;
+    max-height: calc(100dvh - 16px);
+  }
+}
+
+/* User Profile & Appointments Modal Card */
+.profile-modal-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 480px) {
+  .profile-modal-card {
+    border-radius: 18px 18px 12px 12px;
+    max-height: calc(100dvh - 20px);
+  }
+}
+
+@media (max-height: 650px) {
+  .profile-modal-card {
+    max-height: calc(100dvh - 16px);
+  }
+}
+
+/* Modal Headers */
+.modal-header-responsive {
+  padding: 20px 24px;
+  border-bottom: 1px solid #EFEAE5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAF7F4;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .modal-header-responsive {
+    padding: 16px 18px;
+  }
+}
+
+/* Modal Tab Bar */
+.modal-tabs-responsive {
+  display: flex;
+  padding: 8px 24px 0;
+  border-bottom: 1px solid #EFEAE5;
+  gap: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.modal-tabs-responsive::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .modal-tabs-responsive {
+    padding: 6px 16px 0;
+    gap: 8px;
+  }
+}
+
+.modal-tab-btn {
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  min-height: 40px;
+}
+
+@media (max-width: 480px) {
+  .modal-tab-btn {
+    font-size: 0.82rem;
+    padding: 8px 2px;
+    gap: 5px;
+  }
+}
+
+/* Modal Scrollable Content Body */
+.modal-body-responsive {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .modal-body-responsive {
+    padding: 16px;
+  }
+}
+
+/* Responsive Two-Column Grid for Profile Inputs */
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Modal Footer */
+.modal-footer-responsive {
+  padding: 14px 24px;
+  border-top: 1px solid #EFEAE5;
+  background: #FAF7F4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .modal-footer-responsive {
+    padding: 12px 16px;
+  }
+}
+
+/* Mobile Inputs: Ensure 16px font-size to prevent iOS Safari auto-zoom */
+@media (max-width: 768px) {
+  .auth-modal-card input,
+  .profile-modal-card input,
+  .profile-modal-card textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Modal Close Button with Accessible Touch Target */
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s ease, color 0.15s ease;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111;
+}
+
+/* Smooth pop-in animation for modal */
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Responsive Navbar Adjustments for Tablet / Small Desktops */
+@media (max-width: 1120px) and (min-width: 901px) {
+  .navbar-nav {
+    gap: 16px;
+  }
+  .navbar-link {
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    padding: 4px 0;
+  }
+  .navbar-user-btn {
+    padding: 6px 10px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+/* Mobile Appointment Card in Profile Modal */
+.profile-appointment-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #EAE5DF;
+  background: #FAF8F6;
+  transition: background 0.15s ease;
+}
+
+.profile-appointment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: #666;
+  margin-top: 8px;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .profile-appointment-card {
+    padding: 12px 14px;
+  }
+  .profile-appointment-meta {
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+}
+
