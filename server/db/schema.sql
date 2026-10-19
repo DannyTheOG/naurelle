@@ -46,7 +46,11 @@ CREATE TRIGGER update_profiles_updated_at
 
 -- 4. Auth Hook: Automatically create a public.profiles entry whenever a user signs up via Supabase Auth
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql 
+SECURITY DEFINER 
+SET search_path = public
+AS $$
 BEGIN
     INSERT INTO public.profiles (id, email, full_name, phone, role)
     VALUES (
@@ -62,14 +66,20 @@ BEGIN
         phone = CASE WHEN profiles.phone IS NULL OR profiles.phone = '' THEN EXCLUDED.phone ELSE profiles.phone END;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5. Row Level Security (RLS)
+-- 5. Table & Schema Permissions
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.profiles TO postgres, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.profiles TO authenticated;
+GRANT SELECT ON TABLE public.profiles TO anon;
+
+-- 6. Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can select their own profile

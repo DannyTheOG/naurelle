@@ -50,6 +50,12 @@ CREATE TRIGGER update_bookings_updated_at
     BEFORE UPDATE ON public.bookings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Table & Sequence Permissions
+GRANT ALL ON TABLE public.bookings TO postgres, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.bookings TO authenticated;
+GRANT SELECT, INSERT ON TABLE public.bookings TO anon;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
 -- Row Level Security (RLS) for bookings
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 

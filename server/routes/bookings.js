@@ -130,7 +130,10 @@ router.post("/", optionalAuth, async (req, res) => {
             };
 
             if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-                await transporter.sendMail(mailOptions);
+                // Send asynchronously in background so client never waits on SMTP handshake
+                transporter.sendMail(mailOptions).catch((mailError) => {
+                    console.warn("Email notification error (non-fatal):", mailError.message);
+                });
             }
         } catch (mailError) {
             console.warn("Email notification error (non-fatal):", mailError.message);

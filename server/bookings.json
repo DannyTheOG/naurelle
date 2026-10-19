@@ -28,5 +28,25 @@
     "clientId": null,
     "createdAt": "2026-10-18T08:24:41.999Z",
     "status": "pending"
+  },
+  {
+    "id": 1792418528825,
+    "name": "Ama Test",
+    "phone": "0240000000",
+    "email": "ama@example.com",
+    "date": "2026-10-25",
+    "time": "10:00 AM",
+    "services": [
+      {
+        "serviceId": "gel-x",
+        "serviceName": "Gel-X Full Set",
+        "price": 120,
+        "durationMinutes": 60,
+        "displayDuration": "60 mins"
+      }
+    ],
+    "clientId": null,
+    "createdAt": "2026-10-19T14:02:08.825Z",
+    "status": "pending"
   }
 ]

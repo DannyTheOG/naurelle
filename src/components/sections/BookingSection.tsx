@@ -403,6 +403,9 @@ export function BookingSection({
       length: selectedServices.filter((s) => s.lengthName).map((s) => `${s.serviceName}: ${s.lengthName}`).join('; ')
     }
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
+
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
       if (token) {
@@ -412,14 +415,21 @@ export function BookingSection({
       await fetch(`${API_BASE_URL}/api/bookings`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(bookingPayload)
+        body: JSON.stringify(bookingPayload),
+        signal: controller.signal
       })
-    } catch {
-      // Gracefully continue to confirmation screen even if local node server is offline
-      console.warn('Booking API offline or unavailable; continuing to confirmation state.')
+    } catch (fetchErr) {
+      console.warn('Booking API fetch notice:', fetchErr)
     } finally {
+      clearTimeout(timeoutId)
       setSubmitting(false)
       setSubmitted(true)
+      setTimeout(() => {
+        const confirmEl = document.getElementById('booking-confirmation') || document.getElementById('booking')
+        if (confirmEl) {
+          confirmEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 60)
     }
   }
 
@@ -494,7 +504,7 @@ export function BookingSection({
           <div className="surface-white booking-card-main">
             {submitted ? (
               /* Success State */
-              <div style={{ textAlign: 'center', padding: '24px 8px' }}>
+              <div id="booking-confirmation" style={{ textAlign: 'center', padding: '24px 8px' }}>
                 <div
                   style={{
                     width: '60px',
