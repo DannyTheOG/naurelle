@@ -33,6 +33,23 @@ export function parseTime12hToMinutes(timeStr) {
 }
 
 /**
+ * Convert minutes from midnight (e.g. 570) to 12-hour formatted string (e.g. "09:30 AM")
+ */
+export function formatTime12h(minutesFromMidnight) {
+    const normalized = ((minutesFromMidnight % 1440) + 1440) % 1440;
+    const hours24 = Math.floor(normalized / 60);
+    const mins = normalized % 60;
+
+    const period = hours24 >= 12 ? "PM" : "AM";
+    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+
+    const paddedHours = hours12 < 10 ? `0${hours12}` : `${hours12}`;
+    const paddedMins = mins < 10 ? `0${mins}` : `${mins}`;
+
+    return `${paddedHours}:${paddedMins} ${period}`;
+}
+
+/**
  * Check if two appointment windows collide, factoring in the 20-minute operational buffer
  */
 export function checkIntervalOverlap(newStart, newEnd, bookedStart, bookedEnd, bufferMinutes = BUFFER_MINUTES) {
