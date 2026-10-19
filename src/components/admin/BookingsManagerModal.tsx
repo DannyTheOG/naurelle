@@ -139,8 +139,12 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
 
       const json = await res.json()
       if (res.ok && json.success) {
-        setSuccessMsg(`Appointment status updated to ${newStatus}.`)
-        setTimeout(() => setSuccessMsg(''), 3000)
+        if (newStatus === 'confirmed') {
+          setSuccessMsg('Appointment confirmed! Automated confirmation email sent to client.')
+        } else {
+          setSuccessMsg(`Appointment status updated to ${newStatus}.`)
+        }
+        setTimeout(() => setSuccessMsg(''), 3500)
         // Refresh local list
         loadBookings()
       } else {
@@ -694,9 +698,10 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                             onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
                             className="btn btn-burgundy btn-sm"
                             style={{ padding: '4px 10px', fontSize: '0.76rem' }}
+                            title="Confirm this appointment and send automated confirmation email to the client"
                           >
                             <CheckCircle2 size={12} />
-                            <span>Confirm Slot</span>
+                            <span>Confirm &amp; Email Client</span>
                           </button>
                         )}
 
