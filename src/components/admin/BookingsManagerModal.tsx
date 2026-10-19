@@ -247,43 +247,29 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
         {/* Modal Header */}
         <div className="bookings-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span className="editorial-eyebrow" style={{ marginBottom: 0 }}>Studio Management</span>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  background: 'var(--color-accent)',
-                  color: '#FFFFFF',
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  fontWeight: 600
-                }}
-              >
-                {profile?.role}
-              </span>
-            </div>
-            <h2
-              className="bookings-header-title"
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.4rem',
-                margin: '4px 0 0',
-                color: 'var(--text-primary)'
-              }}
-            >
-              Bookings &amp; Schedule Manager
+            <h2 className="bookings-header-title">
+              Bookings
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <div className="bookings-header-actions">
+            <button
+              type="button"
+              onClick={() => setShowBlockTimeModal(true)}
+              className="btn btn-burgundy btn-sm bookings-header-block-btn"
+              title="Block custom studio time"
+            >
+              <PlusCircle size={14} />
+              <span>Block Time</span>
+            </button>
+
             <button
               type="button"
               onClick={loadBookings}
               className="btn btn-minimal btn-sm"
               style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
               title="Refresh appointments"
+              aria-label="Refresh appointments"
             >
               <RefreshCw size={14} className={loading ? 'spin' : ''} />
               <span className="desktop-only">Refresh</span>
@@ -293,7 +279,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               type="button"
               onClick={onClose}
               className="modal-close-btn"
-              aria-label="Close Bookings Manager"
+              aria-label="Close Bookings"
             >
               <X size={20} />
             </button>
@@ -337,115 +323,100 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
           </div>
         )}
 
-        {/* Summary Stat Pills & Controls */}
+        {/* Compact Controls & Filter Panel */}
         <div className="bookings-controls-panel">
-          {/* Metrics row */}
-          <div className="bookings-metrics-row">
-            <div className="bookings-metrics-pills">
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                Overview:
-              </span>
-              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFFFF', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
-                Total: <strong>{stats.total}</strong>
-              </span>
-              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46' }}>
-                Confirmed: <strong>{stats.confirmed}</strong>
-              </span>
-              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
-                Pending: <strong>{stats.pending}</strong>
-              </span>
-              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#F3F4F6', border: '1px solid #E5E7EB', color: '#4B5563' }}>
-                Completed: <strong>{stats.completed}</strong>
-              </span>
-              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
-                Cancelled: <strong>{stats.cancelled}</strong>
-              </span>
-            </div>
-
+          {/* Row 1: Interactive Status Filter Chips */}
+          <div className="bookings-status-chips" role="tablist" aria-label="Filter by appointment status">
             <button
               type="button"
-              onClick={() => setShowBlockTimeModal(true)}
-              className="btn btn-burgundy btn-sm bookings-block-btn"
-              style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              role="tab"
+              aria-selected={statusFilter === 'all'}
+              onClick={() => setStatusFilter('all')}
+              className={`bookings-chip ${statusFilter === 'all' ? 'active' : ''}`}
             >
-              <PlusCircle size={14} />
-              <span>Block Studio Time</span>
+              All <strong>{stats.total}</strong>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'confirmed'}
+              onClick={() => setStatusFilter(statusFilter === 'confirmed' ? 'all' : 'confirmed')}
+              className={`bookings-chip chip-confirmed ${statusFilter === 'confirmed' ? 'active' : ''}`}
+            >
+              Confirmed <strong>{stats.confirmed}</strong>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'pending'}
+              onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
+              className={`bookings-chip chip-pending ${statusFilter === 'pending' ? 'active' : ''}`}
+            >
+              Pending <strong>{stats.pending}</strong>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'completed'}
+              onClick={() => setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed')}
+              className={`bookings-chip chip-completed ${statusFilter === 'completed' ? 'active' : ''}`}
+            >
+              Completed <strong>{stats.completed}</strong>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'cancelled'}
+              onClick={() => setStatusFilter(statusFilter === 'cancelled' ? 'all' : 'cancelled')}
+              className={`bookings-chip chip-cancelled ${statusFilter === 'cancelled' ? 'active' : ''}`}
+            >
+              Cancelled <strong>{stats.cancelled}</strong>
             </button>
           </div>
 
-          {/* Filter Bar */}
-          <div className="bookings-filter-grid">
-            {/* Date filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                Filter Date
-              </label>
+          {/* Row 2: Streamlined Search and Date Bar */}
+          <div className="bookings-search-date-row">
+            <div className="bookings-search-input-wrap">
+              <Search size={14} className="bookings-search-icon" />
+              <input
+                type="text"
+                placeholder="Search client, phone, or service..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bookings-search-input"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="bookings-input-clear-btn"
+                  aria-label="Clear search"
+                  title="Clear search"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <div className="bookings-date-input-wrap">
               <input
                 type="date"
                 value={selectedDateFilter}
                 onChange={(e) => setSelectedDateFilter(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-medium)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
+                className="bookings-date-input"
+                title="Filter by appointment date"
               />
-            </div>
-
-            {/* Status filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                Status Filter
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-medium)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled (Slot freed)</option>
-                <option value="no_show">No Show (Slot freed)</option>
-              </select>
-            </div>
-
-            {/* Search query */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                Search Client / Contact
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  placeholder="Name, phone, or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px 8px 30px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-medium)',
-                    backgroundColor: '#FFFFFF',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-                <Search size={14} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
-              </div>
+              {selectedDateFilter && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedDateFilter('')}
+                  className="bookings-input-clear-btn"
+                  aria-label="Clear date filter"
+                  title="Clear date filter"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
           </div>
         </div>

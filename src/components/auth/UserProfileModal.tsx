@@ -167,7 +167,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
             <span>My Appointments</span>
           </button>
 
-          {profile.role && profile.role !== 'client' && onOpenBookingsManager && (
+            {profile.role && profile.role !== 'client' && onOpenBookingsManager && (
             <button
               type="button"
               onClick={() => {
@@ -182,7 +182,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               }}
             >
               <Sparkles size={16} />
-              <span>Studio Schedule ({profile.role})</span>
+              <span>Bookings</span>
             </button>
           )}
         </div>

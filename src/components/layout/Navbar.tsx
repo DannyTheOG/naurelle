@@ -312,7 +312,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   >
                     <User size={18} style={{ flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      My Account ({displayName})
+                    {displayName.charAt(0).toUpperCase()}
                     </span>
                   </button>
                 ) : (
@@ -367,7 +367,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   >
                     <Calendar size={16} style={{ flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Studio Bookings Manager ({profile.role})
+                      Bookings
                     </span>
                   </button>
                 )}
@@ -386,7 +386,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   onClick={(e) => scrollToSection(e, 'services')}
                   className={activeSection === 'services' || activeSection === 'toes' ? 'active' : ''}
                 >
-                  Services Menu
+                  Services
                 </a>
                 <a
                   href="#gallery"
@@ -396,25 +396,18 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   Portfolio Gallery
                 </a>
                 <a
-                  href="#booking"
-                  onClick={(e) => scrollToSection(e, 'booking')}
-                  className={activeSection === 'booking' ? 'active' : ''}
-                >
-                  Appointments
-                </a>
-                <a
                   href="#studio"
                   onClick={(e) => scrollToSection(e, 'studio')}
                   className={activeSection === 'studio' ? 'active' : ''}
                 >
-                  The Studio &amp; Hours
+                  Studio
                 </a>
                 <a
                   href="#contact"
                   onClick={(e) => scrollToSection(e, 'contact')}
                   className={activeSection === 'contact' ? 'active' : ''}
                 >
-                  Contact &amp; Location
+                  Contact
                 </a>
               </nav>
 
