@@ -127,13 +127,6 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 Services
               </a>
               <a
-                href="#booking"
-                onClick={(e) => scrollToSection(e, 'booking')}
-                className={`navbar-link ${activeSection === 'booking' ? 'active' : ''}`}
-              >
-                Appointments
-              </a>
-              <a
                 href="#studio"
                 onClick={(e) => scrollToSection(e, 'studio')}
                 className={`navbar-link ${activeSection === 'studio' ? 'active' : ''}`}
@@ -169,12 +162,12 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                     maxWidth: '180px',
                   }}
                 >
-                  <User size={15} style={{ flexShrink: 0 }} />
+                  <User size={12} style={{ flexShrink: 0 }} />
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
                   {profile?.role && profile.role !== 'client' && (
                     <span
                       style={{
-                        fontSize: '0.65rem',
+                        fontSize: '0.5rem',
                         textTransform: 'uppercase',
                         background: '#3A141E',
                         color: '#FFF',
@@ -226,7 +219,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   title="Studio Bookings & Schedule"
                 >
                   <Calendar size={14} />
-                  <span>Studio Bookings</span>
+                  <span>Bookings</span>
                 </button>
               )}
 
@@ -286,13 +279,13 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
               {/* Mobile User Profile Header */}
               <div
                 style={{
-                  padding: '12px 16px',
+                  padding: '12px 14px',
                   background: '#F9F6F3',
                   borderRadius: '10px',
                   marginBottom: '16px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  flexDirection: 'column',
+                  gap: '10px',
                 }}
               >
                 {user ? (
@@ -312,6 +305,9 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                       fontSize: '0.9rem',
                       fontWeight: 600,
                       color: '#3A141E',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '2px 0',
                     }}
                   >
                     <User size={18} style={{ flexShrink: 0 }} />
@@ -336,9 +332,12 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                       fontSize: '0.9rem',
                       fontWeight: 600,
                       color: '#3A141E',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '2px 0',
                     }}
                   >
-                    <User size={18} />
+                    <User size={18} style={{ flexShrink: 0 }} />
                     <span>Sign In / Create Account</span>
                   </button>
                 )}
@@ -352,22 +351,24 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                     }}
                     style={{
                       width: '100%',
-                      marginTop: '10px',
                       padding: '10px 14px',
                       backgroundColor: 'rgba(58, 20, 30, 0.08)',
                       border: '1px solid rgba(58, 20, 30, 0.15)',
                       borderRadius: '8px',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '8px',
                       cursor: 'pointer',
-                      fontSize: '0.88rem',
+                      fontSize: '0.85rem',
                       fontWeight: 600,
                       color: '#3A141E',
                     }}
                   >
-                    <Calendar size={16} />
-                    <span>Studio Bookings Manager ({profile.role})</span>
+                    <Calendar size={16} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Studio Bookings Manager ({profile.role})
+                    </span>
                   </button>
                 )}
               </div>

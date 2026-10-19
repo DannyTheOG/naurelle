@@ -238,34 +238,16 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
   return (
     <div className="auth-modal-overlay" onClick={onClose} role="presentation">
       <div
-        className="profile-modal-card"
+        className="profile-modal-card bookings-manager-modal"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="Studio Bookings Manager"
-        style={{
-          maxWidth: '900px',
-          width: '95%',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0,
-          overflow: 'hidden'
-        }}
       >
         {/* Modal Header */}
-        <div
-          style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid var(--border-light)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#FFFFFF'
-          }}
-        >
+        <div className="bookings-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span className="editorial-eyebrow" style={{ marginBottom: 0 }}>Studio Management</span>
               <span
                 style={{
@@ -283,6 +265,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               </span>
             </div>
             <h2
+              className="bookings-header-title"
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: '1.4rem',
@@ -294,7 +277,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <button
               type="button"
               onClick={loadBookings}
@@ -323,7 +306,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
             style={{
               backgroundColor: '#F0FDF4',
               borderBottom: '1px solid #DCFCE7',
-              padding: '10px 24px',
+              padding: '10px 16px',
               color: '#166534',
               fontSize: '0.85rem',
               display: 'flex',
@@ -341,7 +324,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
             style={{
               backgroundColor: '#FEF2F2',
               borderBottom: '1px solid #FEE2E2',
-              padding: '10px 24px',
+              padding: '10px 16px',
               color: '#991B1B',
               fontSize: '0.85rem',
               display: 'flex',
@@ -355,42 +338,35 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
         )}
 
         {/* Summary Stat Pills & Controls */}
-        <div
-          style={{
-            padding: '16px 24px',
-            backgroundColor: 'var(--bg-canvas)',
-            borderBottom: '1px solid var(--border-light)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px'
-          }}
-        >
+        <div className="bookings-controls-panel">
           {/* Metrics row */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-              Overview:
-            </span>
-            <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFFFF', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
-              Total: <strong>{stats.total}</strong>
-            </span>
-            <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46' }}>
-              Confirmed: <strong>{stats.confirmed}</strong>
-            </span>
-            <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
-              Pending: <strong>{stats.pending}</strong>
-            </span>
-            <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#F3F4F6', border: '1px solid #E5E7EB', color: '#4B5563' }}>
-              Completed: <strong>{stats.completed}</strong>
-            </span>
-            <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
-              Cancelled: <strong>{stats.cancelled}</strong>
-            </span>
+          <div className="bookings-metrics-row">
+            <div className="bookings-metrics-pills">
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                Overview:
+              </span>
+              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFFFF', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                Total: <strong>{stats.total}</strong>
+              </span>
+              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46' }}>
+                Confirmed: <strong>{stats.confirmed}</strong>
+              </span>
+              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
+                Pending: <strong>{stats.pending}</strong>
+              </span>
+              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#F3F4F6', border: '1px solid #E5E7EB', color: '#4B5563' }}>
+                Completed: <strong>{stats.completed}</strong>
+              </span>
+              <span style={{ fontSize: '0.82rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
+                Cancelled: <strong>{stats.cancelled}</strong>
+              </span>
+            </div>
 
             <button
               type="button"
               onClick={() => setShowBlockTimeModal(true)}
-              className="btn btn-burgundy btn-sm"
-              style={{ marginLeft: 'auto', padding: '6px 14px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              className="btn btn-burgundy btn-sm bookings-block-btn"
+              style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <PlusCircle size={14} />
               <span>Block Studio Time</span>
@@ -398,7 +374,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
           </div>
 
           {/* Filter Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+          <div className="bookings-filter-grid">
             {/* Date filter */}
             <div>
               <label style={{ display: 'block', fontSize: '0.74rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
@@ -410,10 +386,9 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 onChange={(e) => setSelectedDateFilter(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '7px 10px',
+                  padding: '8px 10px',
                   borderRadius: '6px',
                   border: '1px solid var(--border-medium)',
-                  fontSize: '0.85rem',
                   backgroundColor: '#FFFFFF',
                   outline: 'none',
                   boxSizing: 'border-box'
@@ -431,10 +406,9 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 onChange={(e) => setStatusFilter(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '7px 10px',
+                  padding: '8px 10px',
                   borderRadius: '6px',
                   border: '1px solid var(--border-medium)',
-                  fontSize: '0.85rem',
                   backgroundColor: '#FFFFFF',
                   outline: 'none',
                   boxSizing: 'border-box'
@@ -462,23 +436,22 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '7px 10px 7px 28px',
+                    padding: '8px 10px 8px 30px',
                     borderRadius: '6px',
                     border: '1px solid var(--border-medium)',
-                    fontSize: '0.85rem',
                     backgroundColor: '#FFFFFF',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
                 />
-                <Search size={14} style={{ position: 'absolute', left: '9px', top: '9px', color: 'var(--text-muted)' }} />
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Modal Scrollable Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+        <div className="bookings-list-container">
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
               <RefreshCw size={24} className="spin" style={{ margin: '0 auto 8px' }} />
@@ -540,12 +513,9 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 return (
                   <div
                     key={booking.id}
+                    className="bookings-card"
                     style={{
-                      border: '1px solid var(--border-light)',
-                      borderRadius: 'var(--radius-xs)',
-                      padding: '16px 18px',
                       backgroundColor: isCancelled ? '#FAFAFA' : '#FFFFFF',
-                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
                       opacity: isCancelled ? 0.75 : 1
                     }}
                   >
@@ -637,32 +607,23 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                     </div>
 
                     {/* Client Information details */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '8px',
-                        backgroundColor: 'var(--bg-canvas)',
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-xs)',
-                        fontSize: '0.84rem',
-                        marginBottom: '12px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <User size={13} style={{ color: 'var(--text-muted)' }} />
-                        <strong style={{ color: 'var(--text-primary)' }}>{clientName}</strong>
+                    <div className="bookings-client-grid">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                        <User size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                        <strong style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {clientName}
+                        </strong>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Phone size={13} style={{ color: 'var(--text-muted)' }} />
-                        <a href={`tel:${clientPhone}`} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                        <Phone size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                        <a href={`tel:${clientPhone}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {clientPhone}
                         </a>
                       </div>
                       {clientEmail && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Mail size={13} style={{ color: 'var(--text-muted)' }} />
-                          <a href={`mailto:${clientEmail}`} style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                          <Mail size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                          <a href={`mailto:${clientEmail}`} style={{ color: 'var(--text-muted)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {clientEmail}
                           </a>
                         </div>
@@ -670,34 +631,24 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                     </div>
 
                     {booking.notes && (
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '12px', wordBreak: 'break-word' }}>
                         <strong>Notes:</strong> {booking.notes}
                       </div>
                     )}
 
                     {/* Action buttons row */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '8px',
-                        paddingTop: '8px',
-                        borderTop: '1px dashed var(--border-light)'
-                      }}
-                    >
+                    <div className="bookings-actions-row">
                       <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                         Slot Blocking: {isCancelled ? 'Released (Available for other clients)' : 'Active (Slot Reserved)'}
                       </span>
 
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <div className="bookings-actions-buttons" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         {isPending && (
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
                             className="btn btn-burgundy btn-sm"
-                            style={{ padding: '4px 10px', fontSize: '0.76rem' }}
+                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
                             title="Confirm this appointment and send automated confirmation email to the client"
                           >
                             <CheckCircle2 size={12} />
@@ -710,7 +661,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                             type="button"
                             onClick={() => handleUpdateStatus(booking.id, 'completed')}
                             className="btn btn-minimal btn-sm"
-                            style={{ padding: '4px 10px', fontSize: '0.76rem' }}
+                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
                           >
                             <span>Mark Completed</span>
                           </button>
@@ -725,7 +676,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                               }
                             }}
                             className="btn btn-minimal btn-sm"
-                            style={{ padding: '4px 10px', fontSize: '0.76rem', color: '#991B1B' }}
+                            style={{ padding: '6px 12px', fontSize: '0.76rem', color: '#991B1B' }}
                           >
                             <XCircle size={12} />
                             <span>Cancel &amp; Free Slot</span>
@@ -737,7 +688,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                             type="button"
                             onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
                             className="btn btn-minimal btn-sm"
-                            style={{ padding: '4px 10px', fontSize: '0.76rem' }}
+                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
                           >
                             <span>Reactivate Slot</span>
                           </button>
@@ -752,16 +703,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
         </div>
 
         {/* Modal Footer */}
-        <div
-          style={{
-            padding: '14px 24px',
-            borderTop: '1px solid var(--border-light)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#FFFFFF'
-          }}
-        >
+        <div className="bookings-footer">
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Appointments automatically block a 20-minute operational buffer.
           </span>
@@ -785,19 +727,12 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px'
+            padding: '16px'
           }}
           onClick={() => setShowBlockTimeModal(false)}
         >
           <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 'var(--radius-xs)',
-              maxWidth: '440px',
-              width: '100%',
-              padding: '24px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
-            }}
+            className="bookings-submodal-card"
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -807,7 +742,8 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               <button
                 type="button"
                 onClick={() => setShowBlockTimeModal(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}
+                aria-label="Close submodal"
               >
                 <X size={18} />
               </button>
@@ -838,7 +774,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="bookings-submodal-grid">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
                     Start Time *

@@ -1436,7 +1436,7 @@ export function BookingSection({
                               <div
                                 style={{
                                   display: 'grid',
-                                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 124px), 1fr))',
+                                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 112px), 1fr))',
                                   gap: '10px'
                                 }}
                               >
@@ -1540,7 +1540,7 @@ export function BookingSection({
                                   alignItems: 'center',
                                   justifyContent: 'space-between',
                                   flexWrap: 'wrap',
-                                  gap: '10px',
+                                  gap: '8px',
                                   marginTop: '12px',
                                   padding: '8px 12px',
                                   backgroundColor: 'var(--bg-canvas)',
@@ -1549,7 +1549,7 @@ export function BookingSection({
                                   color: 'var(--text-muted)'
                                 }}
                               >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                                     <span
                                       style={{
@@ -1575,7 +1575,9 @@ export function BookingSection({
                                     Reserved
                                   </span>
                                 </div>
-                                <span>20-minute operational buffer included between bookings</span>
+                                <span style={{ fontSize: '0.75rem', lineHeight: 1.3 }}>
+                                  20-min operational buffer included
+                                </span>
                               </div>
                             </div>
                           )}
