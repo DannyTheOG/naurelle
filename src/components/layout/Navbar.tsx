@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Menu, X, ArrowUpRight, User } from 'lucide-react'
+import { Menu, X, ArrowUpRight, User, Calendar } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 import { AuthModal } from '../auth/AuthModal'
 import { UserProfileModal } from '../auth/UserProfileModal'
+import { BookingsManagerModal } from '../admin/BookingsManagerModal'
 
 type NavbarProps = {
   onOpenBooking?: () => void
@@ -17,6 +18,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [profileModalOpen, setProfileModalOpen] = useState(false)
+  const [bookingsModalOpen, setBookingsModalOpen] = useState(false)
 
   // Track active section on scroll
   useEffect(() => {
@@ -202,6 +204,32 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 </button>
               )}
 
+              {/* Studio Management Button for Admin / Staff */}
+              {profile?.role && profile.role !== 'client' && (
+                <button
+                  type="button"
+                  onClick={() => setBookingsModalOpen(true)}
+                  className="navbar-link"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(58, 20, 30, 0.08)',
+                    color: '#3A141E',
+                    padding: '8px 14px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(58, 20, 30, 0.15)',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                  }}
+                  title="Studio Bookings & Schedule"
+                >
+                  <Calendar size={14} />
+                  <span>Studio Bookings</span>
+                </button>
+              )}
+
               <a
                 href="#booking"
                 onClick={(e) => scrollToSection(e, 'booking')}
@@ -314,6 +342,34 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                     <span>Sign In / Create Account</span>
                   </button>
                 )}
+
+                {profile?.role && profile.role !== 'client' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      setBookingsModalOpen(true)
+                    }}
+                    style={{
+                      width: '100%',
+                      marginTop: '10px',
+                      padding: '10px 14px',
+                      backgroundColor: 'rgba(58, 20, 30, 0.08)',
+                      border: '1px solid rgba(58, 20, 30, 0.15)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      color: '#3A141E',
+                    }}
+                  >
+                    <Calendar size={16} />
+                    <span>Studio Bookings Manager ({profile.role})</span>
+                  </button>
+                )}
               </div>
 
               <nav className="mobile-nav-links" aria-label="Mobile Navigation Links">
@@ -381,7 +437,14 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
 
       {/* Profile Modal */}
-      <UserProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+      <UserProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        onOpenBookingsManager={() => setBookingsModalOpen(true)}
+      />
+
+      {/* Studio Bookings Manager Modal (Admin/Staff) */}
+      <BookingsManagerModal isOpen={bookingsModalOpen} onClose={() => setBookingsModalOpen(false)} />
     </>
   )
 }

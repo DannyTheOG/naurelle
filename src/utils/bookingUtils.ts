@@ -1,5 +1,6 @@
 /**
- * Utilities for appointment durations, schedule calculations, and dynamic time slots.
+ * Utilities for appointment durations, schedule calculations, dynamic time slots,
+ * and double-booking conflict prevention with buffer times.
  */
 
 export type OperatingHoursInfo = {
@@ -17,7 +18,17 @@ export type TimeSlot = {
   startMinutes: number
   endMinutes: number
   displayRange: string
+  isBooked?: boolean
 }
+
+export type BookedInterval = {
+  id?: string | number
+  startMinutes: number
+  endMinutes: number
+  status?: string
+}
+
+export const APPOINTMENT_BUFFER_MINUTES = 20
 
 /**
  * Format total duration in minutes to human-readable string (e.g. "3 hrs", "45 mins", "3 hrs 45 mins")
@@ -51,6 +62,38 @@ export function formatTime12h(minutesFromMidnight: number): string {
   const paddedMins = mins < 10 ? `0${mins}` : `${mins}`
 
   return `${paddedHours}:${paddedMins} ${period}`
+}
+
+/**
+ * Convert 12-hour formatted string (e.g. "09:30 AM", "10:00 AM", "2:30 PM") to minutes from midnight
+ */
+export function parseTime12hToMinutes(timeStr: string): number {
+  if (!timeStr) return 0
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i)
+  if (!match) return 0
+
+  let hours = parseInt(match[1], 10)
+  const minutes = parseInt(match[2], 10)
+  const period = match[3]?.toUpperCase()
+
+  if (period === 'PM' && hours < 12) hours += 12
+  if (period === 'AM' && hours === 12) hours = 0
+
+  return hours * 60 + minutes
+}
+
+/**
+ * Determine if two appointment time windows collide, considering an operational buffer.
+ * A 20-minute buffer ensures the technician has reset the station before and after clients.
+ */
+export function checkIntervalOverlap(
+  newStart: number,
+  newEnd: number,
+  bookedStart: number,
+  bookedEnd: number,
+  bufferMinutes: number = APPOINTMENT_BUFFER_MINUTES
+): boolean {
+  return newStart < (bookedEnd + bufferMinutes) && (newEnd + bufferMinutes) > bookedStart
 }
 
 /**
@@ -109,13 +152,16 @@ export function getOperatingHoursForDate(dateStr: string): OperatingHoursInfo {
 }
 
 /**
- * Generate available time slots based on total appointment duration and studio operating window.
- * Only slots where (startTime + totalDuration <= closeMinutes) are offered.
+ * Generate available time slots based on total appointment duration, operating window,
+ * and already booked intervals. Booked / conflicting slots are marked with isBooked = true
+ * for transparent rendering with a subtle "Reserved" badge.
  */
 export function generateAvailableTimeSlots(
   dateStr: string,
   totalDurationMinutes: number,
-  intervalMinutes = 30
+  intervalMinutes = 30,
+  bookedIntervals: BookedInterval[] = [],
+  bufferMinutes: number = APPOINTMENT_BUFFER_MINUTES
 ): { slots: TimeSlot[]; info: OperatingHoursInfo; exceedsOperatingHours: boolean } {
   const info = getOperatingHoursForDate(dateStr)
 
@@ -155,12 +201,22 @@ export function generateAvailableTimeSlots(
     const startTime = formatTime12h(startMin)
     const endTime = formatTime12h(endMin)
 
+    // Check if slot collides with any existing booked interval on that date
+    const isBooked = bookedIntervals.some((b) => {
+      // Exclude cancelled or no-show bookings from collision checks
+      if (b.status === 'cancelled' || b.status === 'no_show') {
+        return false
+      }
+      return checkIntervalOverlap(startMin, endMin, b.startMinutes, b.endMinutes, bufferMinutes)
+    })
+
     slots.push({
       startTime,
       endTime,
       startMinutes: startMin,
       endMinutes: endMin,
-      displayRange: `${startTime} – ${endTime}`
+      displayRange: `${startTime} – ${endTime}`,
+      isBooked
     })
   }
 

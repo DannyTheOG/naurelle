@@ -5,9 +5,10 @@ import { useAuth } from '../../context/useAuth'
 interface UserProfileModalProps {
   isOpen: boolean
   onClose: () => void
+  onOpenBookingsManager?: () => void
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, onOpenBookingsManager }) => {
   const { profile, signOut, updateProfile, fetchMyBookings } = useAuth()
 
   const [activeTab, setActiveTab] = useState<'profile' | 'bookings'>('profile')
@@ -165,6 +166,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
             <Calendar size={16} />
             <span>My Appointments</span>
           </button>
+
+          {profile.role && profile.role !== 'client' && onOpenBookingsManager && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                onOpenBookingsManager()
+              }}
+              className="modal-tab-btn"
+              style={{
+                borderBottom: '2px solid transparent',
+                color: 'var(--color-accent)',
+                fontWeight: 600,
+              }}
+            >
+              <Sparkles size={16} />
+              <span>Studio Schedule ({profile.role})</span>
+            </button>
+          )}
         </div>
 
         {/* Modal Body */}

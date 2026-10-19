@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { studioConfig } from '../../config/studioConfig'
 import type { ServiceItem, ServiceLengthOption, ToeServiceItem, SelectedBookingService } from '../../types'
-import { Check, ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2, Sparkles, X, AlertCircle, ChevronDown } from 'lucide-react'
-import { formatDuration, generateAvailableTimeSlots, getOperatingHoursForDate } from '../../utils/bookingUtils'
+import { Check, ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2, Sparkles, X, AlertCircle, ChevronDown, Loader2 } from 'lucide-react'
+import { formatDuration, generateAvailableTimeSlots, getOperatingHoursForDate, APPOINTMENT_BUFFER_MINUTES, type BookedInterval } from '../../utils/bookingUtils'
 import { useAuth } from '../../context/useAuth'
 import { API_BASE_URL } from '../../config/api'
 
@@ -30,6 +30,10 @@ export function BookingSection({
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [selectedEndTime, setSelectedEndTime] = useState<string>('')
+
+  // Slot blocking & double-booking prevention state
+  const [bookedIntervals, setBookedIntervals] = useState<BookedInterval[]>([])
+  const [loadingAvailability, setLoadingAvailability] = useState<boolean>(false)
 
   // Client Details
   const [clientName, setClientName] = useState('')
@@ -349,18 +353,51 @@ export function BookingSection({
     ].join('-')
   }, [])
 
+  // Fetch booked intervals for selected date from server
+  const fetchAvailability = useCallback(async (date: string) => {
+    if (!date) {
+      setBookedIntervals([])
+      return
+    }
+    setLoadingAvailability(true)
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/bookings/availability?date=${encodeURIComponent(date)}`)
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.bookedIntervals)) {
+          setBookedIntervals(json.bookedIntervals)
+        }
+      }
+    } catch (err) {
+      console.warn('Availability fetch notice:', err)
+    } finally {
+      setLoadingAvailability(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAvailability(selectedDate)
+    } else {
+      setBookedIntervals([])
+    }
+  }, [selectedDate, fetchAvailability])
+
   const { slots: availableSlots, info: dateHoursInfo, exceedsOperatingHours } = useMemo(() => {
     if (!selectedDate || totalDurationMinutes <= 0) {
       return { slots: [], info: getOperatingHoursForDate(selectedDate), exceedsOperatingHours: false }
     }
-    return generateAvailableTimeSlots(selectedDate, totalDurationMinutes, 30)
-  }, [selectedDate, totalDurationMinutes])
+    return generateAvailableTimeSlots(selectedDate, totalDurationMinutes, 30, bookedIntervals, APPOINTMENT_BUFFER_MINUTES)
+  }, [selectedDate, totalDurationMinutes, bookedIntervals])
 
-  // Reset selected time if date changes and slot is invalid
+  // Reset selected time if date changes or if the selected slot is occupied / invalid
   useEffect(() => {
-    if (selectedTime && availableSlots.every((s) => s.startTime !== selectedTime)) {
-      setSelectedTime('')
-      setSelectedEndTime('')
+    if (selectedTime) {
+      const matchingSlot = availableSlots.find((s) => s.startTime === selectedTime)
+      if (!matchingSlot || matchingSlot.isBooked) {
+        setSelectedTime('')
+        setSelectedEndTime('')
+      }
     }
   }, [selectedDate, availableSlots, selectedTime])
 
@@ -405,6 +442,7 @@ export function BookingSection({
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 8000)
+    let conflictOccurred = false
 
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -412,24 +450,42 @@ export function BookingSection({
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      await fetch(`${API_BASE_URL}/api/bookings`, {
+      const res = await fetch(`${API_BASE_URL}/api/bookings`, {
         method: 'POST',
         headers,
         body: JSON.stringify(bookingPayload),
         signal: controller.signal
       })
+
+      if (res.status === 409) {
+        conflictOccurred = true
+        const errorData = await res.json().catch(() => ({}))
+        setErrorMessage(
+          errorData.error ||
+          'The selected time slot is no longer available. Another client has already reserved an appointment during this window.'
+        )
+        // Refresh availability immediately and return user to Step 2 to pick a new slot
+        await fetchAvailability(selectedDate)
+        setCurrentStep(2)
+        setSelectedTime('')
+        setSelectedEndTime('')
+        return
+      }
     } catch (fetchErr) {
       console.warn('Booking API fetch notice:', fetchErr)
     } finally {
       clearTimeout(timeoutId)
       setSubmitting(false)
-      setSubmitted(true)
-      setTimeout(() => {
-        const confirmEl = document.getElementById('booking-confirmation') || document.getElementById('booking')
-        if (confirmEl) {
-          confirmEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-      }, 60)
+      if (!conflictOccurred) {
+        setSubmitted(true)
+        fetchAvailability(selectedDate)
+        setTimeout(() => {
+          const confirmEl = document.getElementById('booking-confirmation') || document.getElementById('booking')
+          if (confirmEl) {
+            confirmEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 60)
+      }
     }
   }
 
@@ -1310,16 +1366,23 @@ export function BookingSection({
                       {/* Dynamic Time Slots Selection */}
                       {selectedDate && (
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
                             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                               <Clock size={14} style={{ color: 'var(--color-accent)' }} />
                               <span>Available Time Slots *</span>
                             </label>
-                            {dateHoursInfo.isOpen && (
-                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                {dateHoursInfo.dayName} Hours: {dateHoursInfo.displayHours}
-                              </span>
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              {loadingAvailability && (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                  <Loader2 size={12} className="spin" /> Checking schedule...
+                                </span>
+                              )}
+                              {dateHoursInfo.isOpen && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                  {dateHoursInfo.dayName} Hours: {dateHoursInfo.displayHours}
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {!dateHoursInfo.isOpen ? (
@@ -1369,54 +1432,151 @@ export function BookingSection({
                               Please select an upcoming date.
                             </div>
                           ) : (
-                            <div
-                              style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 120px), 1fr))',
-                                gap: '10px'
-                              }}
-                            >
-                              {availableSlots.map((slot) => {
-                                const isSelected = selectedTime === slot.startTime
-                                return (
-                                  <button
-                                    key={slot.startTime}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedTime(slot.startTime)
-                                      setSelectedEndTime(slot.endTime)
-                                      setErrorMessage('')
-                                    }}
-                                    style={{
-                                      padding: '12px 8px',
-                                      minHeight: '52px',
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      gap: '4px',
-                                      backgroundColor: isSelected ? 'var(--color-accent)' : 'var(--bg-surface)',
-                                      color: isSelected ? 'var(--text-white)' : 'var(--text-primary)',
-                                      border: isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-subtle)',
-                                      borderRadius: 'var(--radius-xs)',
-                                      transition: 'all var(--transition-fast)',
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    <span style={{ fontSize: '0.92rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
-                                      {slot.startTime}
-                                    </span>
-                                    <span
+                            <div>
+                              <div
+                                style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 124px), 1fr))',
+                                  gap: '10px'
+                                }}
+                              >
+                                {availableSlots.map((slot) => {
+                                  const isBooked = Boolean(slot.isBooked)
+                                  const isSelected = selectedTime === slot.startTime && !isBooked
+
+                                  return (
+                                    <button
+                                      key={slot.startTime}
+                                      type="button"
+                                      disabled={isBooked}
+                                      aria-disabled={isBooked}
+                                      onClick={() => {
+                                        if (isBooked) return
+                                        setSelectedTime(slot.startTime)
+                                        setSelectedEndTime(slot.endTime)
+                                        setErrorMessage('')
+                                      }}
+                                      title={isBooked ? 'This slot is reserved (includes 20-min buffer)' : `Select ${slot.startTime}`}
                                       style={{
-                                        fontSize: '0.72rem',
-                                        color: isSelected ? 'rgba(255,255,255,0.85)' : 'var(--text-muted)'
+                                        padding: '10px 8px',
+                                        minHeight: '62px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '2px',
+                                        backgroundColor: isBooked
+                                          ? 'rgba(0, 0, 0, 0.035)'
+                                          : isSelected
+                                          ? 'var(--color-accent)'
+                                          : 'var(--bg-surface)',
+                                        color: isBooked
+                                          ? '#8E8880'
+                                          : isSelected
+                                          ? 'var(--text-white)'
+                                          : 'var(--text-primary)',
+                                        border: isBooked
+                                          ? '1px dashed #D5CFCA'
+                                          : isSelected
+                                          ? '1px solid var(--color-accent)'
+                                          : '1px solid var(--border-subtle)',
+                                        borderRadius: 'var(--radius-xs)',
+                                        opacity: isBooked ? 0.65 : 1,
+                                        transition: 'all var(--transition-fast)',
+                                        cursor: isBooked ? 'not-allowed' : 'pointer',
+                                        position: 'relative'
                                       }}
                                     >
-                                      until {slot.endTime}
-                                    </span>
-                                  </button>
-                                )
-                              })}
+                                      <span
+                                        style={{
+                                          fontSize: '0.90rem',
+                                          fontWeight: 600,
+                                          fontFamily: 'var(--font-sans)',
+                                          textDecoration: isBooked ? 'line-through' : 'none',
+                                          color: isBooked ? '#8E8880' : undefined
+                                        }}
+                                      >
+                                        {slot.startTime}
+                                      </span>
+                                      <span
+                                        style={{
+                                          fontSize: '0.68rem',
+                                          color: isBooked
+                                            ? '#A59F98'
+                                            : isSelected
+                                            ? 'rgba(255,255,255,0.85)'
+                                            : 'var(--text-muted)'
+                                        }}
+                                      >
+                                        until {slot.endTime}
+                                      </span>
+                                      {isBooked ? (
+                                        <span
+                                          style={{
+                                            fontSize: '0.62rem',
+                                            fontWeight: 600,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.04em',
+                                            color: '#6B6560',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.07)',
+                                            padding: '1px 6px',
+                                            borderRadius: '4px',
+                                            marginTop: '3px',
+                                            lineHeight: 1.2
+                                          }}
+                                        >
+                                          Reserved
+                                        </span>
+                                      ) : null}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+
+                              {/* Slot Legend & Buffer note */}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  flexWrap: 'wrap',
+                                  gap: '10px',
+                                  marginTop: '12px',
+                                  padding: '8px 12px',
+                                  backgroundColor: 'var(--bg-canvas)',
+                                  borderRadius: 'var(--radius-xs)',
+                                  fontSize: '0.78rem',
+                                  color: 'var(--text-muted)'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                    <span
+                                      style={{
+                                        width: '10px',
+                                        height: '10px',
+                                        borderRadius: '2px',
+                                        backgroundColor: 'var(--bg-surface)',
+                                        border: '1px solid var(--border-subtle)'
+                                      }}
+                                    />
+                                    Available
+                                  </span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                    <span
+                                      style={{
+                                        width: '10px',
+                                        height: '10px',
+                                        borderRadius: '2px',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.07)',
+                                        border: '1px dashed #D5CFCA'
+                                      }}
+                                    />
+                                    Reserved
+                                  </span>
+                                </div>
+                                <span>20-minute operational buffer included between bookings</span>
+                              </div>
                             </div>
                           )}
                         </div>
