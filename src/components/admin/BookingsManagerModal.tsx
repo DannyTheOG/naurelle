@@ -265,18 +265,6 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
 
             <button
               type="button"
-              onClick={loadBookings}
-              className="btn btn-minimal btn-sm"
-              style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
-              title="Refresh appointments"
-              aria-label="Refresh appointments"
-            >
-              <RefreshCw size={14} className={loading ? 'spin' : ''} />
-              <span className="desktop-only">Refresh</span>
-            </button>
-
-            <button
-              type="button"
               onClick={onClose}
               className="modal-close-btn"
               aria-label="Close Bookings"

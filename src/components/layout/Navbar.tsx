@@ -312,7 +312,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                   >
                     <User size={18} style={{ flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {displayName.charAt(0).toUpperCase()}
+                    {displayName.toUpperCase()}
                     </span>
                   </button>
                 ) : (
