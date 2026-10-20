@@ -2,7 +2,7 @@ import express from "express";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import nodemailer from "nodemailer";
+import { sendNewBookingNotification } from "../services/emailService.js";
 import { supabaseAdmin, isSupabaseConfigured } from "../supabaseClient.js";
 import { optionalAuth, authenticateUser, requireRole } from "../middleware/auth.js";
 
@@ -56,15 +56,6 @@ export function checkIntervalOverlap(newStart, newEnd, bookedStart, bookedEnd, b
     return newStart < (bookedEnd + bufferMinutes) && (newEnd + bufferMinutes) > bookedStart;
 }
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
 
 /**
  * GET /api/bookings/availability?date=YYYY-MM-DD
@@ -85,16 +76,16 @@ router.get("/availability", async (req, res) => {
             try {
                 const { data, error } = await supabaseAdmin
                     .from("bookings")
-                    .select("id, date, time, end_time, total_duration_minutes, status, start_minutes, end_minutes")
+                    .select("id, date, time, end_time, total_duration_minutes, status")
                     .eq("date", date)
                     .not("status", "in", '("cancelled","no_show")');
 
                 if (!error && data) {
                     bookedIntervals = data.map((b) => {
-                        const start = b.start_minutes != null ? b.start_minutes : parseTime12hToMinutes(b.time);
-                        const end = b.end_minutes != null
-                            ? b.end_minutes
-                            : (b.end_time ? parseTime12hToMinutes(b.end_time) : start + (b.total_duration_minutes || 60));
+                        const start = parseTime12hToMinutes(b.time);
+                        const end = b.end_time
+                            ? parseTime12hToMinutes(b.end_time)
+                            : start + (b.total_duration_minutes || 60);
 
                         return {
                             id: b.id,
@@ -215,17 +206,18 @@ router.post("/", optionalAuth, async (req, res) => {
             try {
                 const { data } = await supabaseAdmin
                     .from("bookings")
-                    .select("id, date, time, end_time, total_duration_minutes, start_minutes, end_minutes, status")
+                    .select("id, date, time, end_time, total_duration_minutes, status")
                     .eq("date", body.date)
                     .not("status", "in", '("cancelled","no_show")');
 
                 if (data) {
-                    existingActiveBookings = data.map((b) => ({
-                        start: b.start_minutes != null ? b.start_minutes : parseTime12hToMinutes(b.time),
-                        end: b.end_minutes != null
-                            ? b.end_minutes
-                            : (b.end_time ? parseTime12hToMinutes(b.end_time) : parseTime12hToMinutes(b.time) + (b.total_duration_minutes || 60)),
-                    }));
+                    existingActiveBookings = data.map((b) => {
+                        const start = parseTime12hToMinutes(b.time);
+                        const end = b.end_time
+                            ? parseTime12hToMinutes(b.end_time)
+                            : start + (b.total_duration_minutes || 60);
+                        return { start, end };
+                    });
                 }
             } catch (err) {
                 console.warn("Supabase conflict check query error:", err.message);
@@ -292,8 +284,6 @@ router.post("/", optionalAuth, async (req, res) => {
                         end_time: body.endTime || null,
                         total_duration_minutes: durationMinutes,
                         total_duration_display: body.totalDurationDisplay || null,
-                        start_minutes: startMinutes,
-                        end_minutes: endMinutes,
                         price: Number(body.price) || 0,
                         services: body.services || [],
                         notes: body.notes || "",
@@ -324,27 +314,10 @@ router.post("/", optionalAuth, async (req, res) => {
         bookings.push(bookingRecord);
         await fs.writeFile(bookingsFile, JSON.stringify(bookings, null, 2));
 
-        // 3. Send email notifications via Nodemailer if SMTP configured (asynchronous & non-blocking)
-        try {
-            const servicesSummary = Array.isArray(bookingRecord.services) && bookingRecord.services.length > 0
-                ? bookingRecord.services.map((s) => `- ${s.serviceName}${s.lengthName ? ` (${s.lengthName})` : ""}`).join("\n")
-                : (bookingRecord.service || "Standard Service");
-
-            const mailOptions = {
-                from: process.env.SMTP_FROM || process.env.SMTP_USER,
-                to: process.env.SMTP_TO || process.env.SMTP_USER,
-                subject: `New booking request from ${bookingRecord.name || bookingRecord.clientName}`,
-                text: `Name: ${bookingRecord.name || bookingRecord.clientName}\nEmail: ${bookingRecord.email || bookingRecord.clientEmail}\nPhone: ${bookingRecord.phone || bookingRecord.clientPhone || "N/A"}\nServices:\n${servicesSummary}\nDate: ${bookingRecord.date}\nTime: ${bookingRecord.time}\nPrice: ₵${bookingRecord.price || "N/A"}\nNotes: ${bookingRecord.notes || "None"}`,
-            };
-
-            if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-                transporter.sendMail(mailOptions).catch((mailError) => {
-                    console.warn("Email notification error (non-fatal):", mailError.message);
-                });
-            }
-        } catch (mailError) {
-            console.warn("Email notification error (non-fatal):", mailError.message);
-        }
+        // 3. Send automated email notification to naurellebeautystudio@gmail.com (asynchronous & non-blocking)
+        sendNewBookingNotification(bookingRecord).catch((mailErr) => {
+            console.warn("[Email Notification] Background email dispatch warning:", mailErr?.message || mailErr);
+        });
 
         return res.status(201).json({
             success: true,

@@ -48,5 +48,31 @@
     "clientId": null,
     "createdAt": "2026-10-19T14:02:08.825Z",
     "status": "pending"
+  },
+  {
+    "id": 1792510381968,
+    "name": "Efua Sutherland",
+    "phone": "0555987654",
+    "email": "efua.test@example.com",
+    "date": "2026-10-28",
+    "time": "02:00 PM",
+    "endTime": "03:30 PM",
+    "totalDurationMinutes": 90,
+    "totalDurationDisplay": "1 hr 30 mins",
+    "price": 250,
+    "services": [
+      {
+        "serviceName": "Gel Extensions",
+        "lengthName": "Long",
+        "displayDuration": "1 hr 30 mins",
+        "price": 250
+      }
+    ],
+    "notes": "Wedding appointment request.",
+    "startMinutes": 840,
+    "endMinutes": 930,
+    "clientId": null,
+    "createdAt": "2026-10-20T15:33:01.968Z",
+    "status": "pending"
   }
 ]

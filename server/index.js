@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -10,7 +10,6 @@ import adminBookingsRouter from "./routes/adminBookings.js";
 import bookingsRouter from "./routes/bookings.js";
 import { isSupabaseConfigured } from "./supabaseClient.js";
 
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
