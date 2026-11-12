@@ -36,6 +36,30 @@ function isEmailConfigured() {
 const DEFAULT_RESEND_FROM = "Naurelle Beauty Bookings <bookings@booking.naurellebeauty.com>";
 
 /**
+ * App brand color constants aligned with src/index.css & src/App.css
+ */
+const EMAIL_COLORS = {
+    canvas: "#D8D9D9",
+    surface: "#FFFFFF",
+    surfaceSubtle: "#EBECEC",
+    surfaceMuted: "#E2E3E3",
+    accent: "#7A0201",
+    accentHover: "#5F0100",
+    accentTint: "#F9F2F2",
+    accentHeaderSub: "#F2E4E4",
+    textPrimary: "#171717",
+    textMuted: "#555555",
+    textDim: "#7A7A7A",
+    textWhite: "#FFFFFF",
+    borderLight: "#E4E4E4",
+    borderSubtle: "#D6D6D6",
+    pendingBg: "#FFFBEB",
+    pendingBorder: "#FDE68A",
+    pendingText: "#92400E",
+    whatsappBg: "#166534",
+};
+
+/**
  * Sends an email via the Resend HTTP API (HTTPS port 443)
  */
 async function sendViaResend({ fromName, to, replyTo, subject, text, html }) {
@@ -134,15 +158,15 @@ export async function sendNewBookingNotification(booking) {
             : [{ serviceName: booking.service || "Appointment", lengthName: "", displayDuration: durationDisplay, price: booking.price || 0 }];
 
         const servicesTableRows = servicesList.map((s) => `
-            <tr style="border-bottom: 1px solid #EAE3DC;">
-                <td style="padding: 12px 14px; font-weight: 600; color: #2B2625;">
+            <tr style="border-bottom: 1px solid ${EMAIL_COLORS.borderLight};">
+                <td style="padding: 12px 14px; font-weight: 600; color: ${EMAIL_COLORS.textPrimary};">
                     ${s.serviceName || s.name || "Service"}
-                    ${s.lengthName ? `<span style="font-size: 12px; color: #777777; font-weight: normal;"> &bull; ${s.lengthName}</span>` : ""}
+                    ${s.lengthName ? `<span style="font-size: 12px; color: ${EMAIL_COLORS.textDim}; font-weight: normal;"> &bull; ${s.lengthName}</span>` : ""}
                 </td>
-                <td style="padding: 12px 14px; color: #666666; font-size: 13px; text-align: center;">
+                <td style="padding: 12px 14px; color: ${EMAIL_COLORS.textMuted}; font-size: 13px; text-align: center;">
                     ${s.displayDuration || ""}
                 </td>
-                <td style="padding: 12px 14px; text-align: right; font-weight: 700; color: #3A141E;">
+                <td style="padding: 12px 14px; text-align: right; font-weight: 700; color: ${EMAIL_COLORS.accent};">
                     ₵${s.price || 0}
                 </td>
             </tr>
@@ -160,22 +184,22 @@ export async function sendNewBookingNotification(booking) {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>New Booking Request - Naurèlle Beauty</title>
         </head>
-        <body style="margin: 0; padding: 0; background-color: #FAF7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B2625;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF7F4; padding: 32px 12px;">
+        <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.canvas}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: ${EMAIL_COLORS.textPrimary};">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.canvas}; padding: 32px 12px;">
                 <tr>
                     <td align="center">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(58, 20, 30, 0.08); border: 1px solid #EAE3DC;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${EMAIL_COLORS.surface}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(23, 23, 23, 0.08); border: 1px solid ${EMAIL_COLORS.borderSubtle};">
                             
                             <!-- Header Banner -->
                             <tr>
-                                <td align="center" style="background-color: #3A141E; padding: 32px 24px; color: #FFFFFF;">
-                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8DFD8; margin-bottom: 6px; font-weight: 600;">
+                                <td align="center" style="background-color: ${EMAIL_COLORS.accent}; padding: 32px 24px; color: ${EMAIL_COLORS.textWhite};">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${EMAIL_COLORS.accentHeaderSub}; margin-bottom: 6px; font-weight: 600;">
                                         NAURÈLLE BEAUTY STUDIO
                                     </div>
-                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; letter-spacing: 0.02em; color: #FFFFFF;">
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; letter-spacing: 0.02em; color: ${EMAIL_COLORS.textWhite};">
                                         New Booking Request
                                     </h1>
-                                    <p style="margin: 6px 0 0; font-size: 13px; color: #D4C9BF;">
+                                    <p style="margin: 6px 0 0; font-size: 13px; color: ${EMAIL_COLORS.accentHeaderSub};">
                                         A new client appointment has just been scheduled online
                                     </p>
                                 </td>
@@ -184,33 +208,33 @@ export async function sendNewBookingNotification(booking) {
                             <!-- Content -->
                             <tr>
                                 <td style="padding: 28px 24px;">
-                                    <div style="display: inline-block; background-color: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
+                                    <div style="display: inline-block; background-color: ${EMAIL_COLORS.pendingBg}; border: 1px solid ${EMAIL_COLORS.pendingBorder}; color: ${EMAIL_COLORS.pendingText}; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
                                         Status: Pending Confirmation
                                     </div>
 
                                     <!-- Appointment Summary Card -->
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FBF8F5; border: 1px solid #EAE3DC; border-radius: 8px; margin-bottom: 22px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.surfaceSubtle}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 8px; margin-bottom: 22px;">
                                         <tr>
                                             <td style="padding: 18px 20px;">
-                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #3A141E; font-weight: 700; margin-bottom: 12px;">
+                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 12px;">
                                                     Appointment Schedule
                                                 </div>
                                                 <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.8;">
                                                     <tr>
-                                                        <td style="color: #777777; width: 120px;">Date:</td>
-                                                        <td><strong style="color: #2B2625; font-size: 15px;">${date}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim}; width: 120px;">Date:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.textPrimary}; font-size: 15px;">${date}</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="color: #777777;">Time Window:</td>
-                                                        <td><strong style="color: #3A141E; font-size: 15px;">${timeDisplay}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Time Window:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.accent}; font-size: 15px;">${timeDisplay}</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="color: #777777;">Total Duration:</td>
-                                                        <td><span style="color: #2B2625;">${durationDisplay} (+ 20m buffer)</span></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Total Duration:</td>
+                                                        <td><span style="color: ${EMAIL_COLORS.textPrimary};">${durationDisplay} (+ 20m buffer)</span></td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="color: #777777;">Estimated Total:</td>
-                                                        <td><strong style="color: #3A141E; font-size: 16px;">${priceDisplay}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Estimated Total:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.accent}; font-size: 16px;">${priceDisplay}</strong></td>
                                                     </tr>
                                                 </table>
                                             </td>
@@ -218,31 +242,31 @@ export async function sendNewBookingNotification(booking) {
                                     </table>
 
                                     <!-- Client Details Card -->
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #EAE3DC; border-radius: 8px; margin-bottom: 22px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.surface}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 8px; margin-bottom: 22px;">
                                         <tr>
                                             <td style="padding: 18px 20px;">
-                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #3A141E; font-weight: 700; margin-bottom: 12px;">
+                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 12px;">
                                                     Client Information
                                                 </div>
                                                 <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.8;">
                                                     <tr>
-                                                        <td style="color: #777777; width: 120px;">Client Name:</td>
-                                                        <td><strong style="color: #2B2625;">${clientName}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim}; width: 120px;">Client Name:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.textPrimary};">${clientName}</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="color: #777777;">Phone Number:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Phone Number:</td>
                                                         <td>
-                                                            <a href="tel:${clientPhone}" style="color: #3A141E; font-weight: 600; text-decoration: none;">
+                                                            <a href="tel:${clientPhone}" style="color: ${EMAIL_COLORS.accent}; font-weight: 600; text-decoration: none;">
                                                                 ${clientPhone}
                                                             </a>
-                                                            ${cleanPhone ? `&nbsp;&bull;&nbsp;<a href="https://wa.me/${cleanPhone}" target="_blank" style="color: #166534; text-decoration: none; font-weight: 600; font-size: 13px;">WhatsApp &rarr;</a>` : ""}
+                                                            ${cleanPhone ? `&nbsp;&bull;&nbsp;<a href="https://wa.me/${cleanPhone}" target="_blank" style="color: ${EMAIL_COLORS.whatsappBg}; text-decoration: none; font-weight: 600; font-size: 13px;">WhatsApp &rarr;</a>` : ""}
                                                         </td>
                                                     </tr>
                                                     ${clientEmail ? `
                                                     <tr>
-                                                        <td style="color: #777777;">Email:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Email:</td>
                                                         <td>
-                                                            <a href="mailto:${clientEmail}" style="color: #555555; text-decoration: none;">
+                                                            <a href="mailto:${clientEmail}" style="color: ${EMAIL_COLORS.textMuted}; text-decoration: none;">
                                                                 ${clientEmail}
                                                             </a>
                                                         </td>
@@ -254,18 +278,18 @@ export async function sendNewBookingNotification(booking) {
 
                                     <!-- Services Breakdown -->
                                     <div style="margin-bottom: 22px;">
-                                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #3A141E; font-weight: 700; margin-bottom: 10px;">
+                                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 10px;">
                                             Requested Services (${servicesList.length})
                                         </div>
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF8F6; border: 1px solid #EAE3DC; border-radius: 8px; overflow: hidden; font-size: 14px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.surfaceSubtle}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 8px; overflow: hidden; font-size: 14px;">
                                             ${servicesTableRows}
                                         </table>
                                     </div>
 
                                     <!-- Client Notes -->
                                     ${notes ? `
-                                    <div style="background-color: #F8F5F2; border-left: 3px solid #3A141E; padding: 12px 16px; margin-bottom: 22px; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.5; color: #444444;">
-                                        <strong style="color: #3A141E;">Special Client Notes:</strong>
+                                    <div style="background-color: ${EMAIL_COLORS.accentTint}; border-left: 3px solid ${EMAIL_COLORS.accent}; padding: 12px 16px; margin-bottom: 22px; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.5; color: ${EMAIL_COLORS.textMuted};">
+                                        <strong style="color: ${EMAIL_COLORS.accent};">Special Client Notes:</strong>
                                         <p style="margin: 4px 0 0; font-style: italic;">"${notes}"</p>
                                     </div>` : ""}
 
@@ -274,10 +298,10 @@ export async function sendNewBookingNotification(booking) {
                                         <tr>
                                             <td align="center">
                                                 ${cleanPhone ? `
-                                                <a href="https://wa.me/${cleanPhone}" target="_blank" style="display: inline-block; background-color: #166534; color: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 24px; margin-right: 8px; margin-bottom: 8px;">
+                                                <a href="https://wa.me/${cleanPhone}" target="_blank" style="display: inline-block; background-color: ${EMAIL_COLORS.whatsappBg}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 24px; margin-right: 8px; margin-bottom: 8px;">
                                                     Chat on WhatsApp
                                                 </a>` : ""}
-                                                <a href="tel:${clientPhone}" style="display: inline-block; background-color: #3A141E; color: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 24px; margin-bottom: 8px;">
+                                                <a href="tel:${clientPhone}" style="display: inline-block; background-color: ${EMAIL_COLORS.accent}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 13px; font-weight: 600; padding: 12px 24px; border-radius: 24px; margin-bottom: 8px;">
                                                     Call Client
                                                 </a>
                                             </td>
@@ -288,9 +312,9 @@ export async function sendNewBookingNotification(booking) {
 
                             <!-- Footer -->
                             <tr>
-                                <td align="center" style="background-color: #F5EFEB; padding: 18px 20px; font-size: 12px; color: #777777; border-top: 1px solid #ECE6E0;">
-                                    <p style="margin: 0 0 4px 0; font-weight: 600; color: #555555;">Naurèlle Beauty Booking System</p>
-                                    <p style="margin: 0; font-size: 11px; color: #888888;">Automated notification sent to ${recipientEmail} upon new online booking.</p>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.surfaceMuted}; padding: 18px 20px; font-size: 12px; color: ${EMAIL_COLORS.textMuted}; border-top: 1px solid ${EMAIL_COLORS.borderLight};">
+                                    <p style="margin: 0 0 4px 0; font-weight: 600; color: ${EMAIL_COLORS.textPrimary};">Naurèlle Beauty Booking System</p>
+                                    <p style="margin: 0; font-size: 11px; color: ${EMAIL_COLORS.textDim};">Automated notification sent to ${recipientEmail} upon new online booking.</p>
                                 </td>
                             </tr>
                         </table>
@@ -391,9 +415,9 @@ export async function sendConfirmationEmailToClient(booking) {
                 .map(
                     (s) => `
                     <li style="margin-bottom: 8px;">
-                        <strong style="color: #2B2625;">${s.serviceName || s.name}</strong>
-                        ${s.lengthName ? `<span style="color: #666; font-size: 13px;"> &bull; ${s.lengthName}</span>` : ""}
-                        ${s.price ? ` — <span style="color: #3A141E; font-weight: 600;">₵${s.price}</span>` : ""}
+                        <strong style="color: ${EMAIL_COLORS.textPrimary};">${s.serviceName || s.name}</strong>
+                        ${s.lengthName ? `<span style="color: ${EMAIL_COLORS.textMuted}; font-size: 13px;"> &bull; ${s.lengthName}</span>` : ""}
+                        ${s.price ? ` — <span style="color: ${EMAIL_COLORS.accent}; font-weight: 600;">₵${s.price}</span>` : ""}
                     </li>`
                 )
                 .join("");
@@ -409,21 +433,21 @@ export async function sendConfirmationEmailToClient(booking) {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Appointment Confirmed - Naurèlle Beauty</title>
         </head>
-        <body style="margin: 0; padding: 0; background-color: #FAF7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B2625;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF7F4; padding: 36px 12px;">
+        <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.canvas}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: ${EMAIL_COLORS.textPrimary};">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.canvas}; padding: 36px 12px;">
                 <tr>
                     <td align="center">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #ECE6E0;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: ${EMAIL_COLORS.surface}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(23, 23, 23, 0.08); border: 1px solid ${EMAIL_COLORS.borderSubtle};">
                             <!-- Header Banner -->
                             <tr>
-                                <td align="center" style="background-color: #3A141E; padding: 36px 24px; color: #FFFFFF;">
-                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8DFD8; margin-bottom: 8px; font-weight: 600;">
+                                <td align="center" style="background-color: ${EMAIL_COLORS.accent}; padding: 36px 24px; color: ${EMAIL_COLORS.textWhite};">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${EMAIL_COLORS.accentHeaderSub}; margin-bottom: 8px; font-weight: 600;">
                                         NAURÈLLE BEAUTY
                                     </div>
-                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: normal; letter-spacing: 0.02em; color: #FFFFFF;">
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: normal; letter-spacing: 0.02em; color: ${EMAIL_COLORS.textWhite};">
                                         Your Appointment is Confirmed
                                     </h1>
-                                    <p style="margin: 8px 0 0; font-size: 13px; color: #D4C9BF;">
+                                    <p style="margin: 8px 0 0; font-size: 13px; color: ${EMAIL_COLORS.accentHeaderSub};">
                                         Minimalist Nails &bull; Refined Artistry
                                     </p>
                                 </td>
@@ -432,45 +456,45 @@ export async function sendConfirmationEmailToClient(booking) {
                             <!-- Body Content -->
                             <tr>
                                 <td style="padding: 36px 30px;">
-                                    <p style="font-size: 16px; line-height: 1.5; margin: 0 0 14px 0; color: #2B2625;">
+                                    <p style="font-size: 16px; line-height: 1.5; margin: 0 0 14px 0; color: ${EMAIL_COLORS.textPrimary};">
                                         Hello <strong>${clientName}</strong>,
                                     </p>
-                                    <p style="font-size: 15px; line-height: 1.6; color: #555555; margin: 0 0 24px 0;">
+                                    <p style="font-size: 15px; line-height: 1.6; color: ${EMAIL_COLORS.textMuted}; margin: 0 0 24px 0;">
                                         Great news! Your booking at <strong>Naurèlle Beauty</strong> has been reviewed and officially confirmed by our team. Your appointment time is locked in and ready.
                                     </p>
 
                                     <!-- Booking Card -->
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FBF8F5; border: 1px solid #EAE3DC; border-radius: 8px; margin-bottom: 24px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.surfaceSubtle}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 8px; margin-bottom: 24px;">
                                         <tr>
                                             <td style="padding: 20px 22px;">
-                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #3A141E; font-weight: 700; margin-bottom: 12px;">
+                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 12px;">
                                                     Reservation Details
                                                 </div>
                                                 <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.8;">
                                                     <tr>
-                                                        <td style="color: #777777; width: 110px;">Date:</td>
-                                                        <td><strong style="color: #2B2625;">${date}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim}; width: 110px;">Date:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.textPrimary};">${date}</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="color: #777777;">Time:</td>
-                                                        <td><strong style="color: #3A141E; font-size: 15px;">${timeDisplay}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Time:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.accent}; font-size: 15px;">${timeDisplay}</strong></td>
                                                     </tr>
                                                     ${durationDisplay ? `
                                                     <tr>
-                                                        <td style="color: #777777;">Duration:</td>
-                                                        <td style="color: #2B2625;">${durationDisplay}</td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Duration:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textPrimary};">${durationDisplay}</td>
                                                     </tr>` : ""}
                                                     <tr>
-                                                        <td style="color: #777777;">Estimated Total:</td>
-                                                        <td><strong style="color: #3A141E; font-size: 16px;">${priceDisplay}</strong></td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim};">Estimated Total:</td>
+                                                        <td><strong style="color: ${EMAIL_COLORS.accent}; font-size: 16px;">${priceDisplay}</strong></td>
                                                     </tr>
                                                 </table>
 
-                                                <div style="border-top: 1px dashed #DDD5CC; margin: 16px 0 12px; padding-top: 12px;">
-                                                    <div style="color: #777777; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">
+                                                <div style="border-top: 1px dashed ${EMAIL_COLORS.borderSubtle}; margin: 16px 0 12px; padding-top: 12px;">
+                                                    <div style="color: ${EMAIL_COLORS.textDim}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px;">
                                                         Selected Services:
                                                     </div>
-                                                    <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: #333333;">
+                                                    <ul style="margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: ${EMAIL_COLORS.textPrimary};">
                                                         ${servicesHtml}
                                                     </ul>
                                                 </div>
@@ -479,11 +503,11 @@ export async function sendConfirmationEmailToClient(booking) {
                                     </table>
 
                                     <!-- Studio Location & Guidelines -->
-                                    <div style="background-color: #FAF5F5; border-left: 3px solid #3A141E; padding: 16px 18px; margin-bottom: 26px; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; color: #444444;">
-                                        <div style="font-weight: 700; color: #3A141E; margin-bottom: 6px;">Studio Location &amp; Information:</div>
-                                        <div style="margin-bottom: 4px;"><strong>Location:</strong> Abia St, Accra, Ghana</div>
-                                        <div style="margin-bottom: 8px;"><strong>Phone:</strong> 0555214888</div>
-                                        <div style="font-size: 12px; color: #666666;">
+                                    <div style="background-color: ${EMAIL_COLORS.accentTint}; border-left: 3px solid ${EMAIL_COLORS.accent}; padding: 16px 18px; margin-bottom: 26px; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; color: ${EMAIL_COLORS.textMuted};">
+                                        <div style="font-weight: 700; color: ${EMAIL_COLORS.accent}; margin-bottom: 6px;">Studio Location &amp; Information:</div>
+                                        <div style="margin-bottom: 4px; color: ${EMAIL_COLORS.textPrimary};"><strong>Location:</strong> Abia St, Accra, Ghana</div>
+                                        <div style="margin-bottom: 8px; color: ${EMAIL_COLORS.textPrimary};"><strong>Phone:</strong> 0555214888</div>
+                                        <div style="font-size: 12px; color: ${EMAIL_COLORS.textMuted};">
                                             &bull; Please arrive 5–10 minutes before your scheduled appointment.<br>
                                             &bull; If you need to reschedule, please contact us at least 24 hours in advance.
                                         </div>
@@ -493,7 +517,7 @@ export async function sendConfirmationEmailToClient(booking) {
                                     <table width="100%" cellpadding="0" cellspacing="0" style="text-align: center; margin-bottom: 8px;">
                                         <tr>
                                             <td align="center">
-                                                <a href="https://wa.me/qr/WAGV5TSY4DGOF1" target="_blank" style="display: inline-block; background-color: #3A141E; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; padding: 13px 30px; border-radius: 25px; letter-spacing: 0.03em;">
+                                                <a href="https://wa.me/qr/WAGV5TSY4DGOF1" target="_blank" style="display: inline-block; background-color: ${EMAIL_COLORS.accent}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 13px 30px; border-radius: 25px; letter-spacing: 0.03em;">
                                                     Chat with Studio on WhatsApp
                                                 </a>
                                             </td>
@@ -504,10 +528,10 @@ export async function sendConfirmationEmailToClient(booking) {
 
                             <!-- Footer -->
                             <tr>
-                                <td align="center" style="background-color: #F5EFEB; padding: 22px 24px; font-size: 12px; color: #888888; border-top: 1px solid #ECE6E0;">
-                                    <p style="margin: 0 0 4px 0; font-weight: 600; color: #555555;">Naurèlle Beauty Studio</p>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.surfaceMuted}; padding: 22px 24px; font-size: 12px; color: ${EMAIL_COLORS.textMuted}; border-top: 1px solid ${EMAIL_COLORS.borderLight};">
+                                    <p style="margin: 0 0 4px 0; font-weight: 600; color: ${EMAIL_COLORS.textPrimary};">Naurèlle Beauty Studio</p>
                                     <p style="margin: 0 0 6px 0;">Abia St, Accra, Ghana &bull; naurellebeautystudio@gmail.com</p>
-                                    <p style="margin: 0; font-size: 11px; color: #AAAAAA;">You received this email because an appointment was confirmed for this address.</p>
+                                    <p style="margin: 0; font-size: 11px; color: ${EMAIL_COLORS.textDim};">You received this email because an appointment was confirmed for this address.</p>
                                 </td>
                             </tr>
                         </table>
@@ -577,49 +601,49 @@ export async function sendPasswordResetEmail({ to, fullName, resetUrl, expiresIn
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Reset Your Password - Naurèlle Beauty</title>
         </head>
-        <body style="margin: 0; padding: 0; background-color: #FAF7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B2625;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF7F4; padding: 36px 12px;">
+        <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.canvas}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: ${EMAIL_COLORS.textPrimary};">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.canvas}; padding: 36px 12px;">
                 <tr>
                     <td align="center">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(58, 20, 30, 0.08); border: 1px solid #EAE3DC;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; background-color: ${EMAIL_COLORS.surface}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(23, 23, 23, 0.08); border: 1px solid ${EMAIL_COLORS.borderSubtle};">
                             <tr>
-                                <td align="center" style="background-color: #3A141E; padding: 32px 24px; color: #FFFFFF;">
-                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8DFD8; margin-bottom: 6px; font-weight: 600;">
+                                <td align="center" style="background-color: ${EMAIL_COLORS.accent}; padding: 32px 24px; color: ${EMAIL_COLORS.textWhite};">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${EMAIL_COLORS.accentHeaderSub}; margin-bottom: 6px; font-weight: 600;">
                                         NAURÈLLE BEAUTY STUDIO
                                     </div>
-                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; color: #FFFFFF;">
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; color: ${EMAIL_COLORS.textWhite};">
                                         Password Reset Request
                                     </h1>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding: 32px 28px;">
-                                    <p style="font-size: 15px; line-height: 1.6; margin: 0 0 14px 0;">
+                                    <p style="font-size: 15px; line-height: 1.6; margin: 0 0 14px 0; color: ${EMAIL_COLORS.textPrimary};">
                                         Hello <strong>${displayName}</strong>,
                                     </p>
-                                    <p style="font-size: 14px; line-height: 1.6; color: #555555; margin: 0 0 24px 0;">
+                                    <p style="font-size: 14px; line-height: 1.6; color: ${EMAIL_COLORS.textMuted}; margin: 0 0 24px 0;">
                                         We received a request to reset the password for your Naurèlle Beauty account. Click the button below to choose a new password. This link is valid for <strong>${expiresInMinutes} minutes</strong> and can only be used once.
                                     </p>
                                     <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px 0;">
                                         <tr>
                                             <td align="center">
-                                                <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #3A141E; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 26px;">
+                                                <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: ${EMAIL_COLORS.accent}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 26px;">
                                                     Reset Password
                                                 </a>
                                             </td>
                                         </tr>
                                     </table>
-                                    <p style="font-size: 12px; line-height: 1.6; color: #777777; margin: 0 0 14px 0;">
+                                    <p style="font-size: 12px; line-height: 1.6; color: ${EMAIL_COLORS.textDim}; margin: 0 0 14px 0;">
                                         If the button does not work, copy and paste this link into your browser:<br>
-                                        <a href="${resetUrl}" style="color: #3A141E; word-break: break-all;">${resetUrl}</a>
+                                        <a href="${resetUrl}" style="color: ${EMAIL_COLORS.accent}; word-break: break-all;">${resetUrl}</a>
                                     </p>
-                                    <div style="background-color: #FAF8F6; border-left: 3px solid #3A141E; padding: 12px 14px; font-size: 12px; color: #666666; line-height: 1.5;">
+                                    <div style="background-color: ${EMAIL_COLORS.accentTint}; border-left: 3px solid ${EMAIL_COLORS.accent}; padding: 12px 14px; font-size: 12px; color: ${EMAIL_COLORS.textMuted}; line-height: 1.5;">
                                         If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td align="center" style="background-color: #F5EFEB; padding: 16px 20px; font-size: 11px; color: #888888; border-top: 1px solid #ECE6E0;">
+                                <td align="center" style="background-color: ${EMAIL_COLORS.surfaceMuted}; padding: 16px 20px; font-size: 11px; color: ${EMAIL_COLORS.textMuted}; border-top: 1px solid ${EMAIL_COLORS.borderLight};">
                                     Naurèlle Beauty Studio &bull; Abia St, Accra, Ghana
                                 </td>
                             </tr>

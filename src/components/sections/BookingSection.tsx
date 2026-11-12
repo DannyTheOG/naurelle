@@ -541,28 +541,6 @@ export function BookingSection({
           </p>
         </div>
 
-        {/* 3-Step Progress Indicator Bar */}
-        <div className="step-indicator-bar" aria-label="Booking steps">
-          <div className={`step-indicator-item ${currentStep === 1 ? 'active' : currentStep > 1 ? 'completed' : ''}`}>
-            <span className="step-indicator-num">01</span>
-            <span>Services ({selectedServices.length}/3)</span>
-          </div>
-
-          <div style={{ color: 'var(--border-subtle)' }}>&rarr;</div>
-
-          <div className={`step-indicator-item ${currentStep === 2 ? 'active' : currentStep > 2 ? 'completed' : ''}`}>
-            <span className="step-indicator-num">02</span>
-            <span>Date &amp; Time</span>
-          </div>
-
-          <div style={{ color: 'var(--border-subtle)' }}>&rarr;</div>
-
-          <div className={`step-indicator-item ${currentStep === 3 ? 'active' : ''}`}>
-            <span className="step-indicator-num">03</span>
-            <span>Confirm</span>
-          </div>
-        </div>
-
         {/* Booking Container Layout */}
         <div className="booking-layout-grid">
           {/* Main Interaction Area */}
