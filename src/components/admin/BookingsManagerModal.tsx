@@ -457,6 +457,39 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 const isCompleted = booking.status === 'completed'
                 const isExpanded = expandedIds.has(booking.id)
 
+                const statusBadgeStyle: React.CSSProperties = {
+                  fontSize: '0.68rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                  padding: '3px 9px',
+                  borderRadius: '12px',
+                  flexShrink: 0,
+                  backgroundColor: isConfirmed
+                    ? '#ECFDF5'
+                    : isPending
+                    ? '#FFFBEB'
+                    : isCompleted
+                    ? '#F3F4F6'
+                    : '#FEF2F2',
+                  color: isConfirmed
+                    ? '#065F46'
+                    : isPending
+                    ? '#92400E'
+                    : isCompleted
+                    ? '#374151'
+                    : '#991B1B',
+                  border: `1px solid ${
+                    isConfirmed
+                      ? '#A7F3D0'
+                      : isPending
+                      ? '#FDE68A'
+                      : isCompleted
+                      ? '#E5E7EB'
+                      : '#FECACA'
+                  }`
+                }
+
                 return (
                   <div
                     key={booking.id}
@@ -466,7 +499,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                       opacity: isCancelled ? 0.8 : 1
                     }}
                   >
-                    {/* Accordion Header: At a glance ONLY Customer Name, Booking Day & Time */}
+                    {/* Accordion Header: Customer Name, Booking Day & Time, Status */}
                     <button
                       type="button"
                       onClick={() => toggleBookingExpanded(booking.id)}
@@ -486,53 +519,23 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                           </span>
                         </div>
                       </div>
-                      <ChevronDown
-                        size={18}
-                        className={`bookings-accordion-chevron ${isExpanded ? 'rotated' : ''}`}
-                        aria-hidden="true"
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <span style={statusBadgeStyle}>
+                          {booking.status}
+                        </span>
+                        <ChevronDown
+                          size={18}
+                          className={`bookings-accordion-chevron ${isExpanded ? 'rotated' : ''}`}
+                          aria-hidden="true"
+                        />
+                      </div>
                     </button>
 
                     {/* Accordion Body: Remaining Details */}
                     {isExpanded && (
                       <div className="bookings-accordion-body">
-                        {/* Status Badge & Duration */}
+                        {/* Duration */}
                         <div className="bookings-detail-top">
-                          <span
-                            style={{
-                              fontSize: '0.72rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.05em',
-                              fontWeight: 700,
-                              padding: '3px 10px',
-                              borderRadius: '12px',
-                              backgroundColor: isConfirmed
-                                ? '#ECFDF5'
-                                : isPending
-                                ? '#FFFBEB'
-                                : isCompleted
-                                ? '#F3F4F6'
-                                : '#FEF2F2',
-                              color: isConfirmed
-                                ? '#065F46'
-                                : isPending
-                                ? '#92400E'
-                                : isCompleted
-                                ? '#374151'
-                                : '#991B1B',
-                              border: `1px solid ${
-                                isConfirmed
-                                  ? '#A7F3D0'
-                                  : isPending
-                                  ? '#FDE68A'
-                                  : isCompleted
-                                  ? '#E5E7EB'
-                                  : '#FECACA'
-                              }`
-                            }}
-                          >
-                            {booking.status}
-                          </span>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                             {formatDuration(duration)} duration + 20m buffer
                           </span>

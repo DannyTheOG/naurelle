@@ -1010,9 +1010,9 @@ export function BookingSection({
                           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}
                         >
                           <span>Toe Services</span>
-                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                          {/* <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 400 }}>
                             1 hr each &bull; No length required
-                          </span>
+                          </span> */}
                         </label>
                         <div style={{ position: 'relative' }}>
                           <select
