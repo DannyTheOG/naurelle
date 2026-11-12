@@ -27,15 +27,91 @@ export function getMailTransporter() {
 }
 
 /**
- * Send an automated notification email to naurellebeautystudio@gmail.com everytime a client books an appointment
+ * Checks whether an email transport (Resend HTTP API or SMTP fallback) is configured
+ */
+function isEmailConfigured() {
+    return Boolean(process.env.RESEND_API_KEY || getMailTransporter());
+}
+
+const DEFAULT_RESEND_FROM = "Naurelle Beauty Bookings <bookings@booking.naurellebeauty.com>";
+
+/**
+ * Sends an email via the Resend HTTP API (HTTPS port 443)
+ */
+async function sendViaResend({ fromName, to, replyTo, subject, text, html }) {
+    const apiKey = process.env.RESEND_API_KEY;
+    const fromAddress = process.env.RESEND_FROM || DEFAULT_RESEND_FROM;
+    const from = fromAddress.includes("<") ? fromAddress : `"${fromName}" <${fromAddress}>`;
+
+    const payload = {
+        from,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        text,
+        html,
+    };
+
+    if (replyTo) {
+        payload.reply_to = replyTo;
+    }
+
+    const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "User-Agent": "naurelle-beauty/1.0",
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Resend API error (${response.status})`);
+    }
+
+    return data.id;
+}
+
+/**
+ * Dispatches an email using Resend HTTP API when configured, or falls back to Nodemailer SMTP
+ */
+async function dispatchEmail({ fromName, to, replyTo, subject, text, html, logLabel }) {
+    if (process.env.RESEND_API_KEY) {
+        const messageId = await sendViaResend({ fromName, to, replyTo, subject, text, html });
+        console.log(`✅ [Email Notification] ${logLabel} delivered via Resend to ${to}. ID:`, messageId);
+        return { success: true, messageId };
+    }
+
+    const transporter = getMailTransporter();
+    if (!transporter) {
+        console.warn(`[Email Notification] No email provider configured (set RESEND_API_KEY or SMTP credentials). Skipping ${logLabel}.`);
+        return { success: false, skipped: true };
+    }
+
+    const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER || "naurellebeautystudio@gmail.com";
+    const info = await transporter.sendMail({
+        from: `"${fromName}" <${smtpFrom}>`,
+        to,
+        replyTo: replyTo || undefined,
+        subject,
+        text,
+        html,
+    });
+
+    console.log(`✅ [Email Notification] ${logLabel} delivered via SMTP to ${to}. Message ID:`, info.messageId);
+    return { success: true, messageId: info.messageId };
+}
+
+/**
+ * Send an automated notification email to the studio every time a client books an appointment
  */
 export async function sendNewBookingNotification(booking) {
     try {
-        const transporter = getMailTransporter();
-        const recipientEmail = process.env.SMTP_TO || "naurellebeautystudio@gmail.com";
+        const recipientEmail = process.env.RESEND_TO || process.env.SMTP_TO || "naurellebeautystudio@gmail.com";
 
-        if (!transporter) {
-            console.warn("[Email Notification] SMTP credentials not fully configured. Skipping new booking notification.");
+        if (!isEmailConfigured()) {
+            console.warn("[Email Notification] Email credentials not configured. Skipping new booking notification.");
             return;
         }
 
@@ -249,18 +325,15 @@ ${servicesPlainText}
 ${notes ? `CLIENT NOTES:\n"${notes}"\n\n` : ""}Log in to the Naurèlle Beauty Bookings Manager to review or confirm this appointment.
         `.trim();
 
-        const mailOptions = {
-            from: `"Naurèlle Beauty Reservations" <${process.env.SMTP_FROM || process.env.SMTP_USER || "naurellebeautystudio@gmail.com"}>`,
+        return await dispatchEmail({
+            fromName: "Naurèlle Beauty Reservations",
             to: recipientEmail,
             replyTo: clientEmail || undefined,
             subject: `🔔 New Booking: ${clientName} - ${date} at ${time}`,
             text: plainText,
             html: htmlContent,
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ [Email Notification] New booking email successfully delivered to ${recipientEmail}. Message ID:`, info.messageId);
-        return { success: true, messageId: info.messageId };
+            logLabel: "New booking notification",
+        });
     } catch (err) {
         console.error("❌ [Email Notification] Failed to send new booking notification:", err.message);
         return { success: false, error: err.message };
@@ -272,9 +345,8 @@ ${notes ? `CLIENT NOTES:\n"${notes}"\n\n` : ""}Log in to the Naurèlle Beauty Bo
  */
 export async function sendConfirmationEmailToClient(booking) {
     try {
-        const transporter = getMailTransporter();
-        if (!transporter) {
-            console.warn("[Email Notification] SMTP credentials missing. Skipping client confirmation email.");
+        if (!isEmailConfigured()) {
+            console.warn("[Email Notification] Email credentials missing. Skipping client confirmation email.");
             return;
         }
 
@@ -471,17 +543,14 @@ STUDIO POLICY:
 Thank you for choosing Naurèlle Beauty!
         `.trim();
 
-        const mailOptions = {
-            from: `"Naurèlle Beauty" <${process.env.SMTP_FROM || process.env.SMTP_USER || "naurellebeautystudio@gmail.com"}>`,
+        return await dispatchEmail({
+            fromName: "Naurèlle Beauty",
             to: clientEmail,
             subject: `Appointment Confirmed: ${date} at ${time} — Naurèlle Beauty`,
             text: plainText,
             html: htmlContent,
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ [Email Notification] Client confirmation email delivered to ${clientEmail}. Message ID:`, info.messageId);
-        return { success: true, messageId: info.messageId };
+            logLabel: "Client confirmation email",
+        });
     } catch (err) {
         console.error("❌ [Email Notification] Client confirmation email delivery error:", err.message);
         return { success: false, error: err.message };
