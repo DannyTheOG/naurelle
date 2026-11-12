@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useSearchParams } from 'react-router-dom'
 import { Menu, X, ArrowUpRight, User, Calendar } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 import { AuthModal } from '../auth/AuthModal'
@@ -17,8 +18,22 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
   const [activeSection, setActiveSection] = useState<string>('hero')
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [bookingsModalOpen, setBookingsModalOpen] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Automatically open AuthModal when redirected with ?auth=signin or ?auth=forgot
+  useEffect(() => {
+    const authParam = searchParams.get('auth')
+    if (authParam === 'signin' || authParam === 'signup' || authParam === 'forgot') {
+      setAuthModalMode(authParam)
+      setAuthModalOpen(true)
+      const next = new URLSearchParams(searchParams)
+      next.delete('auth')
+      setSearchParams(next, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   // Track active section on scroll
   useEffect(() => {
@@ -428,7 +443,14 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
         )}
 
       {/* Auth Modal */}
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => {
+          setAuthModalOpen(false)
+          setAuthModalMode('signin')
+        }}
+        initialMode={authModalMode}
+      />
 
       {/* Profile Modal */}
       <UserProfileModal

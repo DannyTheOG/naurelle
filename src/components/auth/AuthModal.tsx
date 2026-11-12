@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
-import { X, Mail, Lock, User, Phone, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { X, Mail, Lock, User, Phone, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
-  initialMode?: 'signin' | 'signup'
+  initialMode?: 'signin' | 'signup' | 'forgot'
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'signin' }) => {
-  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -18,7 +18,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
-  const { signInWithEmail, signUp, isConfigured } = useAuth()
+  const { signInWithEmail, signUp, requestPasswordReset, isConfigured } = useAuth()
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode)
+      setErrorMsg('')
+      setSuccessMsg('')
+    }
+  }, [isOpen, initialMode])
 
   if (!isOpen) return null
 
@@ -35,6 +43,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     e.preventDefault()
     setErrorMsg('')
     setSuccessMsg('')
+
+    if (mode === 'forgot') {
+      if (!email.trim()) {
+        setErrorMsg('Please enter your registered email address.')
+        return
+      }
+      setLoading(true)
+      const res = await requestPasswordReset(email.trim())
+      setLoading(false)
+      if (res.success) {
+        setSuccessMsg(res.message || 'If an account exists for that email address, a password reset link has been sent.')
+      } else {
+        setErrorMsg(res.error || 'Unable to send password reset link.')
+      }
+      return
+    }
 
     if (!isConfigured) {
       setErrorMsg('Supabase is not configured yet. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.')
@@ -115,11 +139,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             NAURÈLLE BEAUTY
           </p>
           <p style={{ fontSize: '0.84rem', color: '#6B6865', margin: 0, lineHeight: 1.4 }}>
-            {mode === 'signin' ? 'Sign in to access your appointments & preferences' : 'Create an account for expedited booking'}
+            {mode === 'signin'
+              ? 'Sign in to access your appointments & preferences'
+              : mode === 'signup'
+                ? 'Create an account for expedited booking'
+                : 'Enter your registered email to receive a password reset link'}
           </p>
         </div>
 
         {/* Mode Tab Toggle */}
+        {mode !== 'forgot' && (
         <div
           style={{
             display: 'flex',
@@ -178,6 +207,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             Create Account
           </button>
         </div>
+        )}
 
         {/* Alert Notifications */}
         {errorMsg && (
@@ -302,10 +332,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             </div>
           </div>
 
+          {mode !== 'forgot' && (
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', marginBottom: '5px' }}>
-              Password
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#3A141E', margin: 0 }}>
+                Password
+              </label>
+              {mode === 'signin' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('forgot')
+                    setErrorMsg('')
+                    setSuccessMsg('')
+                    setPassword('')
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#3A141E',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Forgot Password?
+                </button>
+              )}
+            </div>
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: '12px', top: '13px', color: '#888' }} />
               <input
@@ -327,6 +383,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               />
             </div>
           </div>
+          )}
 
           <button
             type="submit"
@@ -345,8 +402,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             }}
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : null}
-            <span>{mode === 'signin' ? 'Sign In' : 'Create Account'}</span>
+            <span>
+              {mode === 'signin'
+                ? 'Sign In'
+                : mode === 'signup'
+                  ? 'Create Account'
+                  : 'Send Reset Link'}
+            </span>
           </button>
+
+          {mode === 'forgot' && (
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin')
+                setErrorMsg('')
+                setSuccessMsg('')
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '6px 0',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                color: '#3A141E',
+                cursor: 'pointer',
+              }}
+            >
+              <ArrowLeft size={15} />
+              <span>Back to Sign In</span>
+            </button>
+          )}
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '18px', fontSize: '0.78rem', color: '#8A8580', lineHeight: 1.4 }}>

@@ -11,6 +11,7 @@ export interface AuthContextType {
   isConfigured: boolean
   signInWithEmail: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>
   signUp: (email: string, pass: string, meta: { fullName: string; phone?: string }) => Promise<{ success: boolean; error?: string; message?: string }>
+  requestPasswordReset: (email: string) => Promise<{ success: boolean; error?: string; message?: string }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
   updateProfile: (updates: { fullName?: string; phone?: string; beautyNotes?: UserProfile['beautyNotes'] }) => Promise<{ success: boolean; error?: string }>

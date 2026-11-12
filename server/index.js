@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import usersRouter from "./routes/users.js";
+import authRouter from "./routes/auth.js";
 import adminUsersRouter from "./routes/adminUsers.js";
 import adminBookingsRouter from "./routes/adminBookings.js";
 import bookingsRouter from "./routes/bookings.js";
@@ -31,6 +32,7 @@ app.get("/health", (_req, res) => {
 });
 
 // User Management & Booking Endpoints
+app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/admin/users", adminUsersRouter);
 app.use("/api/admin/bookings", adminBookingsRouter);

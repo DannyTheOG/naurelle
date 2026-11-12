@@ -556,3 +556,104 @@ Thank you for choosing Naurèlle Beauty!
         return { success: false, error: err.message };
     }
 }
+
+/**
+ * Send a time-limited password reset email to a user
+ */
+export async function sendPasswordResetEmail({ to, fullName, resetUrl, expiresInMinutes = 30 }) {
+    try {
+        if (!isEmailConfigured()) {
+            console.warn("[Email Notification] Email credentials not configured. Skipping password reset email.");
+            return { success: false, skipped: true };
+        }
+
+        const displayName = fullName || "Valued Client";
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reset Your Password - Naurèlle Beauty</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #FAF7F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B2625;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF7F4; padding: 36px 12px;">
+                <tr>
+                    <td align="center">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(58, 20, 30, 0.08); border: 1px solid #EAE3DC;">
+                            <tr>
+                                <td align="center" style="background-color: #3A141E; padding: 32px 24px; color: #FFFFFF;">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8DFD8; margin-bottom: 6px; font-weight: 600;">
+                                        NAURÈLLE BEAUTY STUDIO
+                                    </div>
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; color: #FFFFFF;">
+                                        Password Reset Request
+                                    </h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 32px 28px;">
+                                    <p style="font-size: 15px; line-height: 1.6; margin: 0 0 14px 0;">
+                                        Hello <strong>${displayName}</strong>,
+                                    </p>
+                                    <p style="font-size: 14px; line-height: 1.6; color: #555555; margin: 0 0 24px 0;">
+                                        We received a request to reset the password for your Naurèlle Beauty account. Click the button below to choose a new password. This link is valid for <strong>${expiresInMinutes} minutes</strong> and can only be used once.
+                                    </p>
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px 0;">
+                                        <tr>
+                                            <td align="center">
+                                                <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #3A141E; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 26px;">
+                                                    Reset Password
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p style="font-size: 12px; line-height: 1.6; color: #777777; margin: 0 0 14px 0;">
+                                        If the button does not work, copy and paste this link into your browser:<br>
+                                        <a href="${resetUrl}" style="color: #3A141E; word-break: break-all;">${resetUrl}</a>
+                                    </p>
+                                    <div style="background-color: #FAF8F6; border-left: 3px solid #3A141E; padding: 12px 14px; font-size: 12px; color: #666666; line-height: 1.5;">
+                                        If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" style="background-color: #F5EFEB; padding: 16px 20px; font-size: 11px; color: #888888; border-top: 1px solid #ECE6E0;">
+                                    Naurèlle Beauty Studio &bull; Abia St, Accra, Ghana
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        `;
+
+        const plainText = `
+NAURÈLLE BEAUTY — PASSWORD RESET REQUEST
+
+Hello ${displayName},
+
+We received a request to reset the password for your Naurèlle Beauty account.
+Use the link below to set a new password (valid for ${expiresInMinutes} minutes, single-use):
+
+${resetUrl}
+
+If you did not request a password reset, you can safely ignore this email.
+        `.trim();
+
+        return await dispatchEmail({
+            fromName: "Naurèlle Beauty",
+            to,
+            subject: "Reset Your Password — Naurèlle Beauty",
+            text: plainText,
+            html: htmlContent,
+            logLabel: "Password reset email",
+        });
+    } catch (err) {
+        console.error("❌ [Email Notification] Password reset email delivery error:", err.message);
+        return { success: false, error: err.message };
+    }
+}

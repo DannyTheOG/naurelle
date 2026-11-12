@@ -167,6 +167,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile(null)
   }
 
+  const requestPasswordReset = async (email: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.success) {
+        return {
+          success: true,
+          message: data.message || 'If an account exists for that email address, a password reset link has been sent.',
+        }
+      }
+      return {
+        success: false,
+        error: data.error || 'Unable to send password reset email. Please try again.',
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message || 'Network error requesting password reset.',
+      }
+    }
+  }
+
   const refreshProfile = async () => {
     if (token) {
       await fetchProfile(token)
@@ -234,6 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isConfigured: isSupabaseClientConfigured,
         signInWithEmail,
         signUp,
+        requestPasswordReset,
         signOut,
         refreshProfile,
         updateProfile,
