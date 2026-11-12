@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Menu, X, ArrowUpRight, User, Calendar } from 'lucide-react'
+import { Menu, X, ArrowUpRight, User } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 import { AuthModal } from '../auth/AuthModal'
 import { UserProfileModal } from '../auth/UserProfileModal'
 import { BookingsManagerModal } from '../admin/BookingsManagerModal'
+import { UserAvatarMenu } from './UserAvatarMenu'
 
 type NavbarProps = {
   onOpenBooking?: () => void
 }
 
 export function Navbar({ onOpenBooking }: NavbarProps) {
-  const { user, profile } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState<string>('hero')
@@ -20,6 +21,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [profileModalOpen, setProfileModalOpen] = useState(false)
+  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'bookings'>('profile')
   const [bookingsModalOpen, setBookingsModalOpen] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -110,6 +112,20 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
     ? profile.fullName.split(' ')[0]
     : user?.email?.split('@')[0] || 'Account'
 
+  const handleOpenProfile = () => {
+    setProfileModalTab('profile')
+    setProfileModalOpen(true)
+  }
+
+  const handleOpenBookings = () => {
+    if (profile?.role && profile.role !== 'client') {
+      setBookingsModalOpen(true)
+      return
+    }
+    setProfileModalTab('bookings')
+    setProfileModalOpen(true)
+  }
+
   return (
     <>
       <header className="navbar-wrapper" style={{ boxShadow: scrolled ? '0 4px 20px rgba(0, 0, 0, 0.04)' : 'none' }}>
@@ -156,46 +172,8 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 Contact
               </a>
 
-              {/* User Account Button */}
-              {user ? (
-                <button
-                  type="button"
-                  onClick={() => setProfileModalOpen(true)}
-                  className="navbar-link navbar-user-btn"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'rgba(58, 20, 30, 0.05)',
-                    padding: '8px 14px',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(58, 20, 30, 0.1)',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    color: '#3A141E',
-                    maxWidth: '180px',
-                  }}
-                >
-                  <User size={12} style={{ flexShrink: 0 }} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
-                  {profile?.role && profile.role !== 'client' && (
-                    <span
-                      style={{
-                        fontSize: '0.5rem',
-                        textTransform: 'uppercase',
-                        background: '#3A141E',
-                        color: '#FFF',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {profile.role}
-                    </span>
-                  )}
-                </button>
-              ) : (
+              {/* Sign In Button when logged out */}
+              {!user && (
                 <button
                   type="button"
                   onClick={() => setAuthModalOpen(true)}
@@ -212,32 +190,6 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 </button>
               )}
 
-              {/* Studio Management Button for Admin / Staff */}
-              {profile?.role && profile.role !== 'client' && (
-                <button
-                  type="button"
-                  onClick={() => setBookingsModalOpen(true)}
-                  className="navbar-link"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'rgba(58, 20, 30, 0.08)',
-                    color: '#3A141E',
-                    padding: '8px 14px',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(58, 20, 30, 0.15)',
-                    cursor: 'pointer',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                  }}
-                  title="Studio Bookings & Schedule"
-                >
-                  <Calendar size={14} />
-                  <span>Bookings</span>
-                </button>
-              )}
-
               <a
                 href="#booking"
                 onClick={(e) => scrollToSection(e, 'booking')}
@@ -248,16 +200,29 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
               </a>
             </nav>
 
-            {/* Mobile Hamburger Toggle Button */}
-            <button
-              className="navbar-mobile-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-navigation-drawer"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Right Controls: Unified Avatar Menu (all screen sizes) + Mobile Hamburger */}
+            <div className="navbar-right-controls">
+              {user && (
+                <UserAvatarMenu
+                  displayName={displayName}
+                  email={user.email}
+                  profile={profile}
+                  onOpenProfile={handleOpenProfile}
+                  onOpenBookings={handleOpenBookings}
+                  onLogout={signOut}
+                />
+              )}
+
+              <button
+                className="navbar-mobile-toggle"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-navigation-drawer"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -291,46 +256,16 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 </button>
               </div>
 
-              {/* Mobile User Profile Header */}
-              <div
-                style={{
-                  padding: '12px 14px',
-                  background: '#F9F6F3',
-                  borderRadius: '10px',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                }}
-              >
-                {user ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      setProfileModalOpen(true)
-                    }}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: 600,
-                      color: '#3A141E',
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '2px 0',
-                    }}
-                  >
-                    <User size={18} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {displayName.toUpperCase()}
-                    </span>
-                  </button>
-                ) : (
+              {/* Mobile Sign-In Action (when logged out; logged-in users use the topbar avatar menu) */}
+              {!user && (
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    background: '#F9F6F3',
+                    borderRadius: '10px',
+                    marginBottom: '16px',
+                  }}
+                >
                   <button
                     type="button"
                     onClick={() => {
@@ -355,38 +290,8 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                     <User size={18} style={{ flexShrink: 0 }} />
                     <span>Sign In / Create Account</span>
                   </button>
-                )}
-
-                {profile?.role && profile.role !== 'client' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      setBookingsModalOpen(true)
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      backgroundColor: 'rgba(58, 20, 30, 0.08)',
-                      border: '1px solid rgba(58, 20, 30, 0.15)',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      color: '#3A141E',
-                    }}
-                  >
-                    <Calendar size={16} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Bookings
-                    </span>
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
 
               <nav className="mobile-nav-links" aria-label="Mobile Navigation Links">
                 <a
@@ -457,6 +362,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
         isOpen={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
         onOpenBookingsManager={() => setBookingsModalOpen(true)}
+        initialTab={profileModalTab}
       />
 
       {/* Studio Bookings Manager Modal (Admin/Staff) */}

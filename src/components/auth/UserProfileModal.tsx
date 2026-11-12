@@ -6,12 +6,24 @@ interface UserProfileModalProps {
   isOpen: boolean
   onClose: () => void
   onOpenBookingsManager?: () => void
+  initialTab?: 'profile' | 'bookings'
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, onOpenBookingsManager }) => {
+export const UserProfileModal: React.FC<UserProfileModalProps> = ({
+  isOpen,
+  onClose,
+  onOpenBookingsManager,
+  initialTab = 'profile',
+}) => {
   const { profile, signOut, updateProfile, fetchMyBookings } = useAuth()
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'bookings'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'bookings'>(initialTab)
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab)
+    }
+  }, [isOpen, initialTab])
   const [fullName, setFullName] = useState(profile?.fullName || '')
   const [phone, setPhone] = useState(profile?.phone || '')
   const [preferredLength, setPreferredLength] = useState(profile?.beautyNotes?.preferredLength || '')
