@@ -681,3 +681,312 @@ If you did not request a password reset, you can safely ignore this email.
         return { success: false, error: err.message };
     }
 }
+
+/**
+ * Escapes unsafe HTML characters to prevent XSS in email bodies
+ */
+function escapeHtml(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/**
+ * Send an automated notification email to the studio when a visitor submits the Contact Us form
+ */
+export async function sendContactInquiryNotification({ name, email, phone, message }) {
+    try {
+        const recipientEmail = process.env.RESEND_TO || process.env.SMTP_TO || "naurellebeautystudio@gmail.com";
+
+        if (!isEmailConfigured()) {
+            console.warn("[Email Notification] Email credentials not configured. Skipping contact inquiry notification.");
+            return { success: false, skipped: true };
+        }
+
+        const safeName = escapeHtml(name || "Website Visitor");
+        const safeEmail = escapeHtml(email || "");
+        const safePhone = escapeHtml(phone || "Not provided");
+        const safeMessage = escapeHtml(message || "").replace(/\n/g, "<br>");
+        const cleanPhone = (phone || "").replace(/\D/g, "");
+        const formattedDate = new Date().toLocaleString("en-GB", {
+            timeZone: "UTC",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }) + " UTC";
+
+        const subject = `📬 New Inquiry from ${name || "Website Visitor"} — Naurèlle Beauty`;
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${subject}</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.canvas}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: ${EMAIL_COLORS.textPrimary};">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.canvas}; padding: 32px 12px;">
+                <tr>
+                    <td align="center">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${EMAIL_COLORS.surface}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(23, 23, 23, 0.08); border: 1px solid ${EMAIL_COLORS.borderSubtle};">
+                            
+                            <!-- Header Banner -->
+                            <tr>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.accent}; padding: 32px 24px; color: ${EMAIL_COLORS.textWhite};">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${EMAIL_COLORS.accentHeaderSub}; margin-bottom: 6px; font-weight: 600;">
+                                        NAURÈLLE BEAUTY STUDIO
+                                    </div>
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; letter-spacing: 0.02em; color: ${EMAIL_COLORS.textWhite};">
+                                        New Website Inquiry
+                                    </h1>
+                                    <p style="margin: 6px 0 0; font-size: 13px; color: ${EMAIL_COLORS.accentHeaderSub};">
+                                        A client reached out via the online contact form
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Content -->
+                            <tr>
+                                <td style="padding: 28px 24px;">
+                                    <div style="display: inline-block; background-color: ${EMAIL_COLORS.accentTint}; border: 1px solid ${EMAIL_COLORS.borderLight}; color: ${EMAIL_COLORS.accent}; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
+                                        Direct Inquiry &bull; Received
+                                    </div>
+
+                                    <!-- Client Details Table -->
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.surfaceSubtle}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 8px; margin-bottom: 22px;">
+                                        <tr>
+                                            <td style="padding: 18px 20px;">
+                                                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 12px;">
+                                                    Sender Information
+                                                </div>
+                                                <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.6;">
+                                                    <tr>
+                                                        <td style="color: ${EMAIL_COLORS.textMuted}; width: 90px; padding: 4px 0;">Name:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textPrimary}; font-weight: 600; padding: 4px 0;">${safeName}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="color: ${EMAIL_COLORS.textMuted}; width: 90px; padding: 4px 0;">Email:</td>
+                                                        <td style="padding: 4px 0;">
+                                                            <a href="mailto:${safeEmail}" style="color: ${EMAIL_COLORS.accent}; text-decoration: underline; font-weight: 600;">${safeEmail}</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="color: ${EMAIL_COLORS.textMuted}; width: 90px; padding: 4px 0;">Phone:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textPrimary}; padding: 4px 0;">
+                                                            ${cleanPhone ? `<a href="tel:${cleanPhone}" style="color: ${EMAIL_COLORS.textPrimary}; text-decoration: none;">${safePhone}</a>` : safePhone}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="color: ${EMAIL_COLORS.textMuted}; width: 90px; padding: 4px 0;">Received:</td>
+                                                        <td style="color: ${EMAIL_COLORS.textDim}; font-size: 13px; padding: 4px 0;">${formattedDate}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Message Card -->
+                                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 8px;">
+                                        Message
+                                    </div>
+                                    <div style="background-color: ${EMAIL_COLORS.accentTint}; border-left: 3px solid ${EMAIL_COLORS.accent}; border-radius: 4px; padding: 18px 20px; font-size: 14px; line-height: 1.7; color: ${EMAIL_COLORS.textPrimary}; margin-bottom: 26px;">
+                                        ${safeMessage}
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 10px;">
+                                        <tr>
+                                            <td align="center">
+                                                <a href="mailto:${safeEmail}?subject=Re:%20Your%20inquiry%20to%20Naur%C3%A8lle%20Beauty" style="display: inline-block; background-color: ${EMAIL_COLORS.accent}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 24px; margin-right: 8px;">
+                                                    Reply via Email
+                                                </a>
+                                                ${cleanPhone ? `
+                                                <a href="https://wa.me/${cleanPhone}" target="_blank" style="display: inline-block; background-color: ${EMAIL_COLORS.whatsappBg}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 24px;">
+                                                    Chat on WhatsApp
+                                                </a>
+                                                ` : ""}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.surfaceMuted}; padding: 20px 24px; border-top: 1px solid ${EMAIL_COLORS.borderLight}; font-size: 12px; color: ${EMAIL_COLORS.textDim};">
+                                    <p style="margin: 0 0 6px 0; font-weight: 600; color: ${EMAIL_COLORS.textPrimary};">
+                                        Naurèlle Beauty Studio
+                                    </p>
+                                    <p style="margin: 0; line-height: 1.5;">
+                                        Abia St, Accra, Ghana &bull; naurellebeautystudio@gmail.com
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        `;
+
+        const plainText = `
+NAURÈLLE BEAUTY STUDIO — NEW WEBSITE INQUIRY
+
+Sender Information:
+• Name: ${name || "Website Visitor"}
+• Email: ${email || "Not provided"}
+• Phone: ${phone || "Not provided"}
+• Received: ${formattedDate}
+
+Message:
+${message || ""}
+
+Reply to this inquiry directly by emailing ${email}.
+        `.trim();
+
+        return await dispatchEmail({
+            fromName: "Naurèlle Beauty Inquiries",
+            to: recipientEmail,
+            replyTo: email,
+            subject,
+            text: plainText,
+            html: htmlContent,
+            logLabel: "Contact inquiry notification to studio",
+        });
+    } catch (err) {
+        console.error("❌ [Email Notification] Contact inquiry email error:", err.message);
+        return { success: false, error: err.message };
+    }
+}
+
+/**
+ * Send an automated acknowledgment email to the client confirming receipt of their inquiry
+ */
+export async function sendContactConfirmationToClient({ name, email, message }) {
+    try {
+        if (!email || !isEmailConfigured()) {
+            return { success: false, skipped: true };
+        }
+
+        const safeName = escapeHtml(name || "there");
+        const safeMessage = escapeHtml(message || "").replace(/\n/g, "<br>");
+        const subject = "We've received your message — Naurèlle Beauty";
+
+        const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${subject}</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.canvas}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: ${EMAIL_COLORS.textPrimary};">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.canvas}; padding: 32px 12px;">
+                <tr>
+                    <td align="center">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${EMAIL_COLORS.surface}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(23, 23, 23, 0.08); border: 1px solid ${EMAIL_COLORS.borderSubtle};">
+                            
+                            <!-- Header Banner -->
+                            <tr>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.accent}; padding: 32px 24px; color: ${EMAIL_COLORS.textWhite};">
+                                    <div style="font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${EMAIL_COLORS.accentHeaderSub}; margin-bottom: 6px; font-weight: 600;">
+                                        NAURÈLLE BEAUTY STUDIO
+                                    </div>
+                                    <h1 style="margin: 0; font-family: Georgia, serif; font-size: 24px; font-weight: normal; letter-spacing: 0.02em; color: ${EMAIL_COLORS.textWhite};">
+                                        Message Received
+                                    </h1>
+                                    <p style="margin: 6px 0 0; font-size: 13px; color: ${EMAIL_COLORS.accentHeaderSub};">
+                                        Thank you for reaching out to us
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Content -->
+                            <tr>
+                                <td style="padding: 28px 24px;">
+                                    <p style="font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">
+                                        Hello <strong>${safeName}</strong>,
+                                    </p>
+                                    <p style="font-size: 14px; line-height: 1.6; color: ${EMAIL_COLORS.textMuted}; margin: 0 0 20px 0;">
+                                        Thank you for contacting Naurèlle Beauty. We have received your message and will review it and reply as soon as possible.
+                                    </p>
+
+                                    <!-- Summary of what was sent -->
+                                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: ${EMAIL_COLORS.accent}; font-weight: 700; margin-bottom: 8px;">
+                                        Your Message
+                                    </div>
+                                    <div style="background-color: ${EMAIL_COLORS.surfaceSubtle}; border: 1px solid ${EMAIL_COLORS.borderLight}; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: ${EMAIL_COLORS.textMuted}; margin-bottom: 24px;">
+                                        ${safeMessage}
+                                    </div>
+
+                                    <!-- Urgent Inquiries Callout -->
+                                    <div style="background-color: ${EMAIL_COLORS.accentTint}; border-left: 3px solid ${EMAIL_COLORS.accent}; padding: 14px 16px; font-size: 13px; line-height: 1.5; color: ${EMAIL_COLORS.textPrimary}; margin-bottom: 24px;">
+                                        <strong>Need immediate assistance or looking for a squeeze-in appointment?</strong><br>
+                                        You can also message us directly on WhatsApp at <strong>+233 59 338 6047</strong>.
+                                    </div>
+
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center">
+                                                <a href="https://wa.me/233593386047" target="_blank" style="display: inline-block; background-color: ${EMAIL_COLORS.accent}; color: ${EMAIL_COLORS.textWhite}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 24px;">
+                                                    Chat on WhatsApp
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td align="center" style="background-color: ${EMAIL_COLORS.surfaceMuted}; padding: 20px 24px; border-top: 1px solid ${EMAIL_COLORS.borderLight}; font-size: 12px; color: ${EMAIL_COLORS.textDim};">
+                                    <p style="margin: 0 0 6px 0; font-weight: 600; color: ${EMAIL_COLORS.textPrimary};">
+                                        Naurèlle Beauty Studio
+                                    </p>
+                                    <p style="margin: 0; line-height: 1.5;">
+                                        Abia St, Accra, Ghana &bull; naurellebeautystudio@gmail.com
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        `;
+
+        const plainText = `
+NAURÈLLE BEAUTY STUDIO — MESSAGE RECEIVED
+
+Hello ${name || "there"},
+
+Thank you for contacting Naurèlle Beauty Studio. We have received your message and will get back to you shortly.
+
+Your Message:
+${message || ""}
+
+Need urgent assistance? Chat with us directly on WhatsApp at +233 59 338 6047.
+        `.trim();
+
+        return await dispatchEmail({
+            fromName: "Naurèlle Beauty",
+            to: email,
+            subject,
+            text: plainText,
+            html: htmlContent,
+            logLabel: "Contact confirmation acknowledgment to client",
+        });
+    } catch (err) {
+        console.warn("⚠️ [Email Notification] Could not send confirmation to client:", err.message);
+        return { success: false, error: err.message };
+    }
+}

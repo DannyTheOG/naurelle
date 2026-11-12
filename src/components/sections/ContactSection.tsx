@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { studioConfig } from '../../config/studioConfig'
+import { API_BASE_URL } from '../../config/api'
 import { MessageCircle, Send, CheckCircle2, Phone, Mail } from 'lucide-react'
 
 const InstagramIcon = ({ size = 16 }: { size?: number }) => (
@@ -29,9 +30,9 @@ export function ContactSection() {
   const [success, setSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || !email || !message) {
+    if (!name.trim() || !email.trim() || !message.trim()) {
       setErrorMessage('Please fill in your name, email, and message.')
       return
     }
@@ -39,15 +40,36 @@ export function ContactSection() {
     setLoading(true)
     setErrorMessage('')
 
-    // Simulate sending message
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          message: message.trim()
+        })
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to send message. Please try again.')
+      }
+
       setSuccess(true)
       setName('')
       setEmail('')
       setPhone('')
       setMessage('')
-    }, 600)
+    } catch (err: unknown) {
+      const errText = err instanceof Error ? err.message : 'Failed to send message. Please try again or reach out on WhatsApp.'
+      setErrorMessage(errText)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const directWhatsappUrl =

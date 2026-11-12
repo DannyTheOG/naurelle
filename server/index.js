@@ -9,6 +9,7 @@ import authRouter from "./routes/auth.js";
 import adminUsersRouter from "./routes/adminUsers.js";
 import adminBookingsRouter from "./routes/adminBookings.js";
 import bookingsRouter from "./routes/bookings.js";
+import contactRouter from "./routes/contact.js";
 import { isSupabaseConfigured } from "./supabaseClient.js";
 
 
@@ -37,6 +38,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/admin/users", adminUsersRouter);
 app.use("/api/admin/bookings", adminBookingsRouter);
 app.use("/api/bookings", bookingsRouter);
+app.use("/api/contact", contactRouter);
 
 // Serve static frontend build if dist exists (production mode)
 if (fs.existsSync(distPath)) {
