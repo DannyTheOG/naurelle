@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { studioConfig } from '../../config/studioConfig'
 import type { ServiceItem, ServiceLengthOption, ToeServiceItem, SelectedBookingService } from '../../types'
-import { Check, ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2, Sparkles, X, AlertCircle, ChevronDown, Loader2 } from 'lucide-react'
+import { ArrowRight, ArrowLeft, MessageCircle, Calendar, Clock, CheckCircle2, Sparkles, X, AlertCircle, ChevronDown, Loader2 } from 'lucide-react'
 import { formatDuration, generateAvailableTimeSlots, getOperatingHoursForDate, APPOINTMENT_BUFFER_MINUTES, type BookedInterval } from '../../utils/bookingUtils'
 import { useAuth } from '../../context/useAuth'
 import { API_BASE_URL } from '../../config/api'
@@ -325,6 +325,13 @@ export function BookingSection({
     ])
   }
 
+  // Scroll helper so step height changes never leave viewport below #booking
+  const scrollToBookingTop = () => {
+    setTimeout(() => {
+      document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 40)
+  }
+
   // Navigate from Step 1 to Step 2 (Date & Dynamic Time)
   const handleProceedToDateStep = () => {
     if (pendingLengthServiceId) {
@@ -341,6 +348,7 @@ export function BookingSection({
 
     setErrorMessage('')
     setCurrentStep(2)
+    scrollToBookingTop()
   }
 
   // Date selection & dynamic slot generation
@@ -409,6 +417,7 @@ export function BookingSection({
     }
     setErrorMessage('')
     setCurrentStep(3)
+    scrollToBookingTop()
   }
 
   // Step 3 Form Submission
@@ -845,398 +854,211 @@ export function BookingSection({
                       </div>
                     )}
 
-                    {/* Pending Length Selection Prompt Banner */}
-                    {pendingService && (
-                      <div
-                        style={{
-                          backgroundColor: 'rgba(122, 2, 1, 0.05)',
-                          border: '1px solid var(--color-accent)',
-                          borderRadius: 'var(--radius-xs)',
-                          padding: '16px 20px',
-                          marginBottom: '24px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Sparkles size={16} style={{ color: 'var(--color-accent)' }} />
-                            <strong style={{ fontSize: '0.96rem', color: 'var(--color-accent)' }}>
-                              Select length for {pendingService.name}:
-                            </strong>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleCancelPendingLength}
-                            className="btn btn-minimal btn-sm"
-                            style={{ padding: '2px 8px', fontSize: '0.76rem' }}
+                    {/* Compact Service Dropdowns (Option B) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '24px' }}>
+                      {/* Nail & Lash Services Select */}
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label
+                          htmlFor="booking-main-service-select"
+                          className="form-label"
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}
+                        >
+                          <span>Nail &amp; Lash Services</span>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                            {studioConfig.services.length} services
+                          </span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <select
+                            id="booking-main-service-select"
+                            className="form-input"
+                            value={pendingLengthServiceId || ''}
+                            onChange={(e) => {
+                              const serviceId = e.target.value
+                              if (!serviceId) return
+                              const service = studioConfig.services.find((s) => s.id === serviceId)
+                              if (service) {
+                                handleSelectMainService(service)
+                              }
+                            }}
+                            style={{
+                              width: '100%',
+                              appearance: 'none',
+                              WebkitAppearance: 'none',
+                              paddingRight: '38px',
+                              cursor: 'pointer',
+                              backgroundColor: '#FFFFFF'
+                            }}
                           >
-                            Cancel
-                          </button>
-                        </div>
-                        <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                          Please choose your preferred length below before selecting another service.
-                        </p>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
-                          {pendingService.lengthOptions?.map((length) => (
-                            <button
-                              key={length.id}
-                              type="button"
-                              onClick={() => handleConfirmServiceWithLength(pendingService, length)}
-                              style={{
-                                padding: '12px 14px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '4px',
-                                backgroundColor: '#FFFFFF',
-                                border: '1px solid var(--color-accent)',
-                                borderRadius: 'var(--radius-xs)',
-                                cursor: 'pointer',
-                                transition: 'all var(--transition-fast)'
-                              }}
-                            >
-                              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>
-                                {length.name}
-                              </strong>
-                              {length.magnets && (
-                                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                  {length.magnets} magnets
-                                </span>
-                              )}
-                              <span
-                                style={{
-                                  fontFamily: 'var(--font-serif)',
-                                  fontSize: '1.15rem',
-                                  fontWeight: 700,
-                                  color: 'var(--color-accent)'
-                                }}
-                              >
-                                {length.displayPrice}
-                              </span>
-                            </button>
-                          ))}
+                            <option value="">Select a nail or lash service...</option>
+                            {studioConfig.services.map((service) => {
+                              const confirmedItem = selectedServices.find((s) => s.serviceId === service.id)
+                              const isMaxReached = selectedServices.length >= 3 && !confirmedItem
+                              return (
+                                <option key={service.id} value={service.id} disabled={isMaxReached}>
+                                  {service.name} — {service.displayPrice} ({service.displayDuration})
+                                  {confirmedItem
+                                    ? ` ✓ Selected${confirmedItem.lengthName ? ` (${confirmedItem.lengthName})` : ''}`
+                                    : ''}
+                                </option>
+                              )
+                            })}
+                          </select>
+                          <ChevronDown
+                            size={16}
+                            style={{
+                              position: 'absolute',
+                              right: '12px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              color: 'var(--text-muted)',
+                              pointerEvents: 'none'
+                            }}
+                          />
                         </div>
                       </div>
-                    )}
 
-                    {/* Main Nail Services Section */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                      <span
-                        style={{
-                          display: 'block',
-                          fontSize: '0.78rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.12em',
-                          color: 'var(--text-muted)',
-                          marginBottom: '4px'
-                        }}
-                      >
-                        Nail & Lash Services
-                      </span>
-
-                      {studioConfig.services.map((service) => {
-                        const confirmedItem = selectedServices.find((s) => s.serviceId === service.id)
-                        const isConfirmed = Boolean(confirmedItem)
-                        const isPending = pendingLengthServiceId === service.id
-                        const isMaxReached = selectedServices.length >= 3 && !isConfirmed && !isPending
-                        const isBlockedByPending = Boolean(pendingLengthServiceId && pendingLengthServiceId !== service.id)
-                        const isLashService = service.category === 'lashes'
-                        const optionTerm = isLashService ? 'option' : 'length'
-                        const optionTermTitle = isLashService ? 'Option' : 'Length'
-
-                        return (
-                          <div
-                            key={service.id}
-                            style={{
-                              border: isPending
-                                ? '2px solid var(--color-accent)'
-                                : isConfirmed
-                                ? '1px solid var(--color-accent)'
-                                : '1px solid var(--border-light)',
-                              backgroundColor: isConfirmed ? '#FAF6F6' : 'var(--bg-surface)',
-                              borderRadius: 'var(--radius-xs)',
-                              padding: '18px 22px',
-                              transition: 'all var(--transition-normal)',
-                              opacity: isMaxReached ? 0.5 : isBlockedByPending ? 0.7 : 1,
-                              cursor: isMaxReached ? 'not-allowed' : 'pointer',
-                              position: 'relative'
-                            }}
-                            onClick={() => !isMaxReached && handleSelectMainService(service)}
-                          >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div style={{ flex: 1, paddingRight: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                                  <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>
-                                    {service.name}
-                                  </strong>
-
-                                  {confirmedItem?.lengthName && (
-                                    <span
-                                      style={{
-                                        fontSize: '0.76rem',
-                                        fontWeight: 600,
-                                        backgroundColor: 'var(--color-accent)',
-                                        color: '#FFFFFF',
-                                        padding: '2px 8px',
-                                        borderRadius: '10px'
-                                      }}
-                                    >
-                                      {isLashService ? '' : 'Length: '}{confirmedItem.lengthName}
-                                    </span>
-                                  )}
-
-                                  {!isLashService && (
-                                    <span
-                                      style={{
-                                        fontSize: '0.74rem',
-                                        fontWeight: 600,
-                                        color: 'var(--color-accent)',
-                                        backgroundColor: 'rgba(122,2,1,0.06)',
-                                        padding: '2px 8px',
-                                        borderRadius: '12px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                      }}
-                                    >
-                                      <Clock size={11} />
-                                      {service.displayDuration}
-                                    </span>
-                                  )}
-
-                                  {service.hasLengths && (
-                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                      ({optionTermTitle} required)
-                                    </span>
-                                  )}
-                                </div>
-
-                                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block' }}>
-                                  {service.description}
-                                </span>
-                              </div>
-
-                              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                                <span
-                                  style={{
-                                    fontFamily: 'var(--font-serif)',
-                                    fontSize: '1.25rem',
-                                    fontWeight: 700,
-                                    color: isConfirmed ? 'var(--color-accent)' : 'var(--text-primary)'
-                                  }}
-                                >
-                                  {confirmedItem ? `₵${confirmedItem.price}` : service.displayPrice}
-                                </span>
-
-                                <div
-                                  style={{
-                                    width: '22px',
-                                    height: '22px',
-                                    borderRadius: '50%',
-                                    border: isConfirmed ? '2px solid var(--color-accent)' : '1px solid var(--border-subtle)',
-                                    backgroundColor: isConfirmed ? 'var(--color-accent)' : 'transparent',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#FFFFFF'
-                                  }}
-                                >
-                                  {isConfirmed ? <Check size={13} /> : service.hasLengths ? <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} /> : null}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Inline Length/Option Selection Dropdown if this card is currently pending */}
-                            {isPending && (
-                              <div
-                                style={{
-                                  marginTop: '16px',
-                                  paddingTop: '16px',
-                                  borderTop: '1px dashed var(--border-medium)'
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                  <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                                    Select {optionTerm} for {service.name} before selecting another service:
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={handleCancelPendingLength}
-                                    style={{
-                                      border: 'none',
-                                      background: 'none',
-                                      color: 'var(--text-muted)',
-                                      fontSize: '0.78rem',
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
-                                  {service.lengthOptions?.map((length) => {
-                                    const isLengthActive = confirmedItem?.lengthId === length.id
-                                    return (
-                                      <button
-                                        key={length.id}
-                                        type="button"
-                                        onClick={() => handleConfirmServiceWithLength(service, length)}
-                                        style={{
-                                          padding: '10px 12px',
-                                          display: 'flex',
-                                          flexDirection: 'column',
-                                          alignItems: 'center',
-                                          gap: '3px',
-                                          backgroundColor: isLengthActive ? 'var(--color-accent)' : '#FFFFFF',
-                                          color: isLengthActive ? '#FFFFFF' : 'var(--text-primary)',
-                                          border: isLengthActive ? '1px solid var(--color-accent)' : '1px solid var(--border-medium)',
-                                          borderRadius: 'var(--radius-xs)',
-                                          cursor: 'pointer',
-                                          transition: 'all var(--transition-fast)'
-                                        }}
-                                      >
-                                        <strong style={{ fontSize: '0.9rem' }}>{length.name}</strong>
-                                        {length.magnets && (
-                                          <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>
-                                            {length.magnets} magnets
-                                          </span>
-                                        )}
-                                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.05rem', fontWeight: 700 }}>
-                                          {length.displayPrice}
-                                        </span>
-                                      </button>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Option to change length or remove if already confirmed */}
-                            {isConfirmed && !isPending && service.hasLengths && (
-                              <div
-                                style={{
-                                  marginTop: '12px',
-                                  paddingTop: '10px',
-                                  borderTop: '1px dashed var(--border-light)',
-                                  display: 'flex',
-                                  gap: '12px',
-                                  alignItems: 'center'
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => setPendingLengthServiceId(service.id)}
-                                  className="btn btn-minimal btn-sm"
-                                  style={{ padding: '3px 10px', fontSize: '0.76rem' }}
-                                >
-                                  Change {optionTermTitle} ({confirmedItem?.lengthName})
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveService(service.id)}
-                                  style={{
-                                    border: 'none',
-                                    background: 'none',
-                                    color: 'var(--color-accent)',
-                                    fontSize: '0.76rem',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  Remove Service
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-
-                      {/* Toe Services Section */}
-                      <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
-                        <span
+                      {/* Secondary Length / Option Select when pending */}
+                      {pendingService && (
+                        <div
+                          className="form-group"
                           style={{
-                            display: 'block',
-                            fontSize: '0.78rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.12em',
-                            color: 'var(--text-muted)',
-                            marginBottom: '12px'
+                            marginBottom: 0,
+                            backgroundColor: 'rgba(122, 2, 1, 0.04)',
+                            border: '1px solid var(--color-accent)',
+                            borderRadius: 'var(--radius-xs)',
+                            padding: '14px 16px'
                           }}
                         >
-                          Toe Services (1 hr each &bull; No length required)
-                        </span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label
+                              htmlFor="booking-length-select"
+                              style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            >
+                              <Sparkles size={14} />
+                              <span>
+                                Choose {pendingService.category === 'lashes' ? 'Option' : 'Length'} for {pendingService.name} *
+                              </span>
+                            </label>
+                            <button
+                              type="button"
+                              onClick={handleCancelPendingLength}
+                              style={{
+                                border: 'none',
+                                background: 'none',
+                                color: 'var(--text-muted)',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '10px' }}>
-                          {studioConfig.toeServices.map((toe) => {
-                            const isSelected = selectedServices.some((s) => s.serviceId === toe.id)
-                            const isMaxReached = selectedServices.length >= 3 && !isSelected
+                          <div style={{ position: 'relative' }}>
+                            <select
+                              id="booking-length-select"
+                              className="form-input"
+                              value={selectedServices.find((s) => s.serviceId === pendingService.id)?.lengthId || ''}
+                              onChange={(e) => {
+                                const lengthId = e.target.value
+                                if (!lengthId) return
+                                const chosen = pendingService.lengthOptions?.find((l) => l.id === lengthId)
+                                if (chosen) {
+                                  handleConfirmServiceWithLength(pendingService, chosen)
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                appearance: 'none',
+                                WebkitAppearance: 'none',
+                                paddingRight: '38px',
+                                cursor: 'pointer',
+                                backgroundColor: '#FFFFFF'
+                              }}
+                            >
+                              <option value="">
+                                Select {pendingService.category === 'lashes' ? 'an option' : 'a length'}...
+                              </option>
+                              {pendingService.lengthOptions?.map((length) => (
+                                <option key={length.id} value={length.id}>
+                                  {length.name} — {length.displayPrice}
+                                  {length.magnets ? ` (${length.magnets} magnets)` : ''}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown
+                              size={16}
+                              style={{
+                                position: 'absolute',
+                                right: '12px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: 'var(--color-accent)',
+                                pointerEvents: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                            return (
-                              <div
-                                key={toe.id}
-                                className={`selection-card ${isSelected ? 'selected' : ''}`}
-                                onClick={() => !isMaxReached && handleSelectToeService(toe)}
-                                style={{
-                                  padding: '14px 16px',
-                                  opacity: isMaxReached ? 0.5 : 1,
-                                  cursor: isMaxReached ? 'not-allowed' : 'pointer'
-                                }}
-                              >
-                                <div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                    <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                                      {toe.name}
-                                    </strong>
-                                  </div>
-                                  <span
-                                    style={{
-                                      fontSize: '0.72rem',
-                                      color: 'var(--color-accent)',
-                                      backgroundColor: 'rgba(122,2,1,0.06)',
-                                      padding: '1px 6px',
-                                      borderRadius: '10px',
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '3px'
-                                    }}
-                                  >
-                                    <Clock size={10} />
-                                    {toe.displayDuration}
-                                  </span>
-                                </div>
-
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                  <span
-                                    style={{
-                                      fontFamily: 'var(--font-serif)',
-                                      fontSize: '1.15rem',
-                                      fontWeight: 700,
-                                      color: isSelected ? 'var(--color-accent)' : 'var(--text-primary)'
-                                    }}
-                                  >
-                                    {toe.displayPrice}
-                                  </span>
-                                  <div
-                                    style={{
-                                      width: '20px',
-                                      height: '20px',
-                                      borderRadius: '50%',
-                                      border: isSelected ? '2px solid var(--color-accent)' : '1px solid var(--border-subtle)',
-                                      backgroundColor: isSelected ? 'var(--color-accent)' : 'transparent',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      color: '#FFFFFF'
-                                    }}
-                                  >
-                                    {isSelected && <Check size={12} />}
-                                  </div>
-                                </div>
-                              </div>
-                            )
-                          })}
+                      {/* Toe Services Select */}
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label
+                          htmlFor="booking-toe-service-select"
+                          className="form-label"
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}
+                        >
+                          <span>Toe Services</span>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                            1 hr each &bull; No length required
+                          </span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <select
+                            id="booking-toe-service-select"
+                            className="form-input"
+                            value=""
+                            onChange={(e) => {
+                              const toeId = e.target.value
+                              if (!toeId) return
+                              const toe = studioConfig.toeServices.find((t) => t.id === toeId)
+                              if (toe) {
+                                handleSelectToeService(toe)
+                              }
+                            }}
+                            style={{
+                              width: '100%',
+                              appearance: 'none',
+                              WebkitAppearance: 'none',
+                              paddingRight: '38px',
+                              cursor: 'pointer',
+                              backgroundColor: '#FFFFFF'
+                            }}
+                          >
+                            <option value="">Select a toe service...</option>
+                            {studioConfig.toeServices.map((toe) => {
+                              const isSelected = selectedServices.some((s) => s.serviceId === toe.id)
+                              const isMaxReached = selectedServices.length >= 3 && !isSelected
+                              return (
+                                <option key={toe.id} value={toe.id} disabled={isMaxReached}>
+                                  {toe.name} — {toe.displayPrice} ({toe.displayDuration})
+                                  {isSelected ? ' ✓ Selected' : ''}
+                                </option>
+                              )
+                            })}
+                          </select>
+                          <ChevronDown
+                            size={16}
+                            style={{
+                              position: 'absolute',
+                              right: '12px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              color: 'var(--text-muted)',
+                              pointerEvents: 'none'
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1593,7 +1415,10 @@ export function BookingSection({
 
                     <div className="booking-actions-row">
                       <button
-                        onClick={() => setCurrentStep(1)}
+                        onClick={() => {
+                          setCurrentStep(1)
+                          scrollToBookingTop()
+                        }}
                         className="btn btn-minimal btn-sm"
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
@@ -1743,7 +1568,10 @@ export function BookingSection({
                     <div className="booking-actions-row">
                       <button
                         type="button"
-                        onClick={() => setCurrentStep(2)}
+                        onClick={() => {
+                          setCurrentStep(2)
+                          scrollToBookingTop()
+                        }}
                         className="btn btn-minimal btn-sm"
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >

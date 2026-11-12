@@ -12,7 +12,8 @@ import {
   Ban,
   Search,
   PlusCircle,
-  RefreshCw
+  RefreshCw,
+  ChevronDown
 } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 import { API_BASE_URL } from '../../config/api'
@@ -59,10 +60,23 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [successMsg, setSuccessMsg] = useState<string>('')
 
-  // Filters
+  // Filters & Accordion state
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [expandedIds, setExpandedIds] = useState<Set<string | number>>(() => new Set())
+
+  const toggleBookingExpanded = (id: string | number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   // Block time state
   const [showBlockTimeModal, setShowBlockTimeModal] = useState<boolean>(false)
@@ -88,7 +102,6 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
     try {
       const params = new URLSearchParams()
       if (selectedDateFilter) params.append('date', selectedDateFilter)
-      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter)
       if (searchQuery.trim()) params.append('search', searchQuery.trim())
 
       const res = await fetch(`${API_BASE_URL}/api/admin/bookings?${params.toString()}`, {
@@ -113,7 +126,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
     } finally {
       setLoading(false)
     }
-  }, [token, selectedDateFilter, statusFilter, searchQuery])
+  }, [token, selectedDateFilter, searchQuery])
 
   useEffect(() => {
     if (isOpen) {
@@ -202,7 +215,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
     }
   }
 
-  // Computed summary metrics
+  // Computed summary metrics (accurate across all statuses for current date/search)
   const stats = useMemo(() => {
     return {
       total: bookings.length,
@@ -212,6 +225,11 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
       cancelled: bookings.filter((b) => b.status === 'cancelled').length
     }
   }, [bookings])
+
+  const filteredBookings = useMemo(() => {
+    if (statusFilter === 'all') return bookings
+    return bookings.filter((b) => b.status === statusFilter)
+  }, [bookings, statusFilter])
 
   if (!isOpen) return null
 
@@ -313,57 +331,25 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
 
         {/* Compact Controls & Filter Panel */}
         <div className="bookings-controls-panel">
-          {/* Row 1: Interactive Status Filter Chips */}
-          <div className="bookings-status-chips" role="tablist" aria-label="Filter by appointment status">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'all'}
-              onClick={() => setStatusFilter('all')}
-              className={`bookings-chip ${statusFilter === 'all' ? 'active' : ''}`}
-            >
-              All <strong>{stats.total}</strong>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'confirmed'}
-              onClick={() => setStatusFilter(statusFilter === 'confirmed' ? 'all' : 'confirmed')}
-              className={`bookings-chip chip-confirmed ${statusFilter === 'confirmed' ? 'active' : ''}`}
-            >
-              Confirmed <strong>{stats.confirmed}</strong>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'pending'}
-              onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
-              className={`bookings-chip chip-pending ${statusFilter === 'pending' ? 'active' : ''}`}
-            >
-              Pending <strong>{stats.pending}</strong>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'completed'}
-              onClick={() => setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed')}
-              className={`bookings-chip chip-completed ${statusFilter === 'completed' ? 'active' : ''}`}
-            >
-              Completed <strong>{stats.completed}</strong>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'cancelled'}
-              onClick={() => setStatusFilter(statusFilter === 'cancelled' ? 'all' : 'cancelled')}
-              className={`bookings-chip chip-cancelled ${statusFilter === 'cancelled' ? 'active' : ''}`}
-            >
-              Cancelled <strong>{stats.cancelled}</strong>
-            </button>
-          </div>
+          <div className="bookings-controls-grid">
+            {/* Statistics / Status Filter Dropdown */}
+            <div className="bookings-stats-select-wrap">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bookings-stats-select"
+                aria-label="Filter bookings by status"
+              >
+                <option value="all">All Bookings ({stats.total})</option>
+                <option value="confirmed">Confirmed ({stats.confirmed})</option>
+                <option value="pending">Pending ({stats.pending})</option>
+                <option value="completed">Completed ({stats.completed})</option>
+                <option value="cancelled">Cancelled ({stats.cancelled})</option>
+              </select>
+              <ChevronDown size={15} className="bookings-stats-select-icon" aria-hidden="true" />
+            </div>
 
-          {/* Row 2: Streamlined Search and Date Bar */}
-          <div className="bookings-search-date-row">
+            {/* Search Input */}
             <div className="bookings-search-input-wrap">
               <Search size={14} className="bookings-search-icon" />
               <input
@@ -386,6 +372,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               )}
             </div>
 
+            {/* Date Filter Input */}
             <div className="bookings-date-input-wrap">
               <input
                 type="date"
@@ -416,7 +403,7 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               <RefreshCw size={24} className="spin" style={{ margin: '0 auto 8px' }} />
               <p style={{ margin: 0 }}>Loading appointments...</p>
             </div>
-          ) : bookings.length === 0 ? (
+          ) : filteredBookings.length === 0 ? (
             <div
               style={{
                 textAlign: 'center',
@@ -452,8 +439,8 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {bookings.map((booking) => {
+            <div className="bookings-accordion-list">
+              {filteredBookings.map((booking) => {
                 const clientName = booking.name || booking.client_name || booking.client?.full_name || 'Guest Client'
                 const clientPhone = booking.phone || booking.client_phone || booking.client?.phone || 'No phone'
                 const clientEmail = booking.email || booking.client_email || booking.client?.email || ''
@@ -468,192 +455,190 @@ export const BookingsManagerModal: React.FC<BookingsManagerModalProps> = ({ isOp
                 const isConfirmed = booking.status === 'confirmed'
                 const isPending = booking.status === 'pending'
                 const isCompleted = booking.status === 'completed'
+                const isExpanded = expandedIds.has(booking.id)
 
                 return (
                   <div
                     key={booking.id}
-                    className="bookings-card"
+                    className={`bookings-accordion-item ${isExpanded ? 'expanded' : ''}`}
                     style={{
                       backgroundColor: isCancelled ? '#FAFAFA' : '#FFFFFF',
-                      opacity: isCancelled ? 0.75 : 1
+                      opacity: isCancelled ? 0.8 : 1
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span
-                            style={{
-                              fontFamily: 'var(--font-serif)',
-                              fontSize: '1.05rem',
-                              fontWeight: 700,
-                              color: 'var(--text-primary)'
-                            }}
-                          >
-                            {booking.date}
+                    {/* Accordion Header: At a glance ONLY Customer Name, Booking Day & Time */}
+                    <button
+                      type="button"
+                      onClick={() => toggleBookingExpanded(booking.id)}
+                      className="bookings-accordion-trigger"
+                      aria-expanded={isExpanded}
+                    >
+                      <div className="bookings-accordion-summary">
+                        <span className="bookings-accordion-client">{clientName}</span>
+                        <div className="bookings-accordion-datetime">
+                          <span className="bookings-accordion-date">{booking.date}</span>
+                          <span className="bookings-accordion-time">
+                            <Clock size={12} aria-hidden="true" />
+                            <span>
+                              {booking.time}
+                              {endTime ? ` – ${endTime}` : ''}
+                            </span>
                           </span>
+                        </div>
+                      </div>
+                      <ChevronDown
+                        size={18}
+                        className={`bookings-accordion-chevron ${isExpanded ? 'rotated' : ''}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {/* Accordion Body: Remaining Details */}
+                    {isExpanded && (
+                      <div className="bookings-accordion-body">
+                        {/* Status Badge & Duration */}
+                        <div className="bookings-detail-top">
                           <span
                             style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              backgroundColor: 'rgba(58, 20, 30, 0.06)',
-                              color: 'var(--color-accent)',
-                              fontSize: '0.8rem',
-                              fontWeight: 600,
-                              padding: '2px 8px',
-                              borderRadius: '4px'
+                              fontSize: '0.72rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em',
+                              fontWeight: 700,
+                              padding: '3px 10px',
+                              borderRadius: '12px',
+                              backgroundColor: isConfirmed
+                                ? '#ECFDF5'
+                                : isPending
+                                ? '#FFFBEB'
+                                : isCompleted
+                                ? '#F3F4F6'
+                                : '#FEF2F2',
+                              color: isConfirmed
+                                ? '#065F46'
+                                : isPending
+                                ? '#92400E'
+                                : isCompleted
+                                ? '#374151'
+                                : '#991B1B',
+                              border: `1px solid ${
+                                isConfirmed
+                                  ? '#A7F3D0'
+                                  : isPending
+                                  ? '#FDE68A'
+                                  : isCompleted
+                                  ? '#E5E7EB'
+                                  : '#FECACA'
+                              }`
                             }}
                           >
-                            <Clock size={12} />
-                            {booking.time} {endTime ? `– ${endTime}` : ''}
+                            {booking.status}
                           </span>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            ({formatDuration(duration)} duration + 20m buffer)
+                            {formatDuration(duration)} duration + 20m buffer
                           </span>
                         </div>
-                      </div>
 
-                      {/* Status Badge */}
-                      <div>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                            fontWeight: 700,
-                            padding: '3px 10px',
-                            borderRadius: '12px',
-                            backgroundColor: isConfirmed
-                              ? '#ECFDF5'
-                              : isPending
-                              ? '#FFFBEB'
-                              : isCompleted
-                              ? '#F3F4F6'
-                              : '#FEF2F2',
-                            color: isConfirmed
-                              ? '#065F46'
-                              : isPending
-                              ? '#92400E'
-                              : isCompleted
-                              ? '#374151'
-                              : '#991B1B',
-                            border: `1px solid ${
-                              isConfirmed
-                                ? '#A7F3D0'
-                                : isPending
-                                ? '#FDE68A'
-                                : isCompleted
-                                ? '#E5E7EB'
-                                : '#FECACA'
-                            }`
-                          }}
-                        >
-                          {booking.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Services and Price */}
-                    <div style={{ marginBottom: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '6px' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--color-accent)', fontSize: '0.94rem' }}>
-                          {servicesText}
-                        </span>
-                        <span style={{ fontWeight: 700, fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-                          ₵{booking.price || 0}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Client Information details */}
-                    <div className="bookings-client-grid">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                        <User size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                        <strong style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {clientName}
-                        </strong>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                        <Phone size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                        <a href={`tel:${clientPhone}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {clientPhone}
-                        </a>
-                      </div>
-                      {clientEmail && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                          <Mail size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                          <a href={`mailto:${clientEmail}`} style={{ color: 'var(--text-muted)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {clientEmail}
-                          </a>
+                        {/* Services and Price */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '6px' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--color-accent)', fontSize: '0.94rem' }}>
+                            {servicesText}
+                          </span>
+                          <span style={{ fontWeight: 700, fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                            ₵{booking.price || 0}
+                          </span>
                         </div>
-                      )}
-                    </div>
 
-                    {booking.notes && (
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '12px', wordBreak: 'break-word' }}>
-                        <strong>Notes:</strong> {booking.notes}
+                        {/* Client Contact Information */}
+                        <div className="bookings-client-grid">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                            <User size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                            <strong style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {clientName}
+                            </strong>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                            <Phone size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                            <a href={`tel:${clientPhone}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {clientPhone}
+                            </a>
+                          </div>
+                          {clientEmail && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                              <Mail size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                              <a href={`mailto:${clientEmail}`} style={{ color: 'var(--text-muted)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {clientEmail}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {booking.notes && (
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                            <strong>Notes:</strong> {booking.notes}
+                          </div>
+                        )}
+
+                        {/* Action buttons row */}
+                        <div className="bookings-actions-row">
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                            Slot Blocking: {isCancelled ? 'Released (Available for other clients)' : 'Active (Slot Reserved)'}
+                          </span>
+
+                          <div className="bookings-actions-buttons" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {isPending && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                                className="btn btn-burgundy btn-sm"
+                                style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                                title="Confirm this appointment and send automated confirmation email to the client"
+                              >
+                                <CheckCircle2 size={12} />
+                                <span>Confirm &amp; Email Client</span>
+                              </button>
+                            )}
+
+                            {isConfirmed && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(booking.id, 'completed')}
+                                className="btn btn-minimal btn-sm"
+                                style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                              >
+                                <span>Mark Completed</span>
+                              </button>
+                            )}
+
+                            {!isCancelled && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm('Cancel this appointment? This will release the blocked time slot so other customers can book it.')) {
+                                    handleUpdateStatus(booking.id, 'cancelled')
+                                  }
+                                }}
+                                className="btn btn-minimal btn-sm"
+                                style={{ padding: '6px 12px', fontSize: '0.76rem', color: '#991B1B' }}
+                              >
+                                <XCircle size={12} />
+                                <span>Cancel &amp; Free Slot</span>
+                              </button>
+                            )}
+
+                            {isCancelled && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                                className="btn btn-minimal btn-sm"
+                                style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                              >
+                                <span>Reactivate Slot</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
-
-                    {/* Action buttons row */}
-                    <div className="bookings-actions-row">
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                        Slot Blocking: {isCancelled ? 'Released (Available for other clients)' : 'Active (Slot Reserved)'}
-                      </span>
-
-                      <div className="bookings-actions-buttons" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                        {isPending && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                            className="btn btn-burgundy btn-sm"
-                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
-                            title="Confirm this appointment and send automated confirmation email to the client"
-                          >
-                            <CheckCircle2 size={12} />
-                            <span>Confirm &amp; Email Client</span>
-                          </button>
-                        )}
-
-                        {isConfirmed && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(booking.id, 'completed')}
-                            className="btn btn-minimal btn-sm"
-                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
-                          >
-                            <span>Mark Completed</span>
-                          </button>
-                        )}
-
-                        {!isCancelled && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (window.confirm('Cancel this appointment? This will release the blocked time slot so other customers can book it.')) {
-                                handleUpdateStatus(booking.id, 'cancelled')
-                              }
-                            }}
-                            className="btn btn-minimal btn-sm"
-                            style={{ padding: '6px 12px', fontSize: '0.76rem', color: '#991B1B' }}
-                          >
-                            <XCircle size={12} />
-                            <span>Cancel &amp; Free Slot</span>
-                          </button>
-                        )}
-
-                        {isCancelled && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                            className="btn btn-minimal btn-sm"
-                            style={{ padding: '6px 12px', fontSize: '0.76rem' }}
-                          >
-                            <span>Reactivate Slot</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
                   </div>
                 )
               })}
